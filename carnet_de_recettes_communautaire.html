@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Carnet de Recettes - Communautaire & Favoris</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue.js 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Plus Jakarta Sans) -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            900: '#7c2d12',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+        }
+        .recipe-card:hover {
+            transform: translateY(-4px);
+        }
+    </style>
+</head>
+<body class="bg-amber-50/40 font-sans text-slate-800 min-h-screen flex flex-col">
+
+    <div id="app" class="flex-grow flex flex-col">
+        <!-- Navigation Header -->
+        <header class="sticky top-0 z-40 glass-header border-b border-orange-100 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-20 items-center">
+                    <!-- Logo -->
+                    <div class="flex items-center space-x-3 cursor-pointer" @click="currentTab = 'home'">
+                        <div class="w-12 h-12 bg-gradient-to-tr from-brand-500 to-amber-400 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-orange-500/30">
+                            <i class="fa-solid fa-utensils"></i>
+                        </div>
+                        <div>
+                            <span class="text-2xl font-extrabold bg-gradient-to-r from-brand-700 via-brand-600 to-amber-600 bg-clip-text text-transparent">GourmetCraft</span>
+                            <span class="block text-xs font-semibold tracking-wider text-amber-700 uppercase">Carnet Communautaire</span>
+                        </div>
+                    </div>
+
+                    <!-- Desktop Nav Links -->
+                    <nav class="hidden md:flex items-center space-x-1 bg-amber-100/50 p-1.5 rounded-2xl border border-amber-200/50">
+                        <button @click="currentTab = 'home'" :class="navBtnStyle('home')">
+                            <i class="fa-solid fa-house text-sm"></i>
+                            <span>Accueil</span>
+                        </button>
+                        <button @click="currentTab = 'my-recipes'" :class="navBtnStyle('my-recipes')">
+                            <i class="fa-solid fa-book-open text-sm"></i>
+                            <span>Mes Recettes</span>
+                        </button>
+                        <button @click="currentTab = 'favorites'" :class="navBtnStyle('favorites')">
+                            <i class="fa-solid fa-heart text-sm"></i>
+                            <span>Favoris</span>
+                            <span v-if="favoriteCount > 0" class="ml-1.5 bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ favoriteCount }}</span>
+                        </button>
+                    </nav>
+
+                    <!-- User / Auth Controls -->
+                    <div class="flex items-center space-x-3">
+                        <button @click="openCreateModal" class="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-brand-500 to-amber-500 hover:from-brand-600 hover:to-amber-600 text-white font-semibold px-5 py-2.5 rounded-xl shadow-md shadow-brand-500/20 transition-all hover:shadow-lg">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Créer une recette</span>
+                        </button>
+
+                        <div v-if="currentUser" class="flex items-center space-x-3 pl-3 border-l border-amber-200">
+                            <div class="w-10 h-10 bg-amber-200 border-2 border-brand-500 rounded-full flex items-center justify-center font-bold text-brand-800 shadow-sm">
+                                {{ currentUser.username.charAt(0).toUpperCase() }}
+                            </div>
+                            <button @click="logout" title="Déconnexion" class="text-slate-400 hover:text-rose-500 transition-colors p-2">
+                                <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                            </button>
+                        </div>
+                        <button v-else @click="showAuthModal = true" class="bg-slate-900 hover:bg-slate-800 text-white font-medium px-5 py-2.5 rounded-xl transition-all">
+                            Connexion
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation Bar -->
+            <div class="md:hidden flex justify-around border-t border-orange-100 py-2.5 bg-white/90">
+                <button @click="currentTab = 'home'" :class="mobileNavStyle('home')">
+                    <i class="fa-solid fa-house text-lg"></i>
+                    <span class="text-xs">Accueil</span>
+                </button>
+                <button @click="currentTab = 'my-recipes'" :class="mobileNavStyle('my-recipes')">
+                    <i class="fa-solid fa-book-open text-lg"></i>
+                    <span class="text-xs">Mes Recettes</span>
+                </button>
+                <button @click="currentTab = 'favorites'" :class="mobileNavStyle('favorites')">
+                    <i class="fa-solid fa-heart text-lg"></i>
+                    <span class="text-xs">Favoris ({{ favoriteCount }})</span>
+                </button>
+                <button @click="openCreateModal" class="text-brand-600 flex flex-col items-center">
+                    <i class="fa-solid fa-circle-plus text-xl"></i>
+                    <span class="text-xs font-semibold">Créer</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Container -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+            
+            <!-- Hero / Banner Section -->
+            <div class="relative overflow-hidden bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white rounded-3xl p-8 sm:p-12 mb-10 shadow-xl">
+                <div class="relative z-10 max-w-2xl">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/30 text-brand-300 border border-brand-500/40 mb-4">
+                        <i class="fa-solid fa-fire-flame-curved mr-2"></i> Plateforme culinaire 2.0
+                    </span>
+                    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight mb-4">
+                        Partagez vos délices, inspirez la communauté.
+                    </h1>
+                    <p class="text-slate-300 text-base sm:text-lg mb-6">
+                        Explorez des centaines de recettes artisanales, sauvegardez vos favoris et devenez le chef de votre propre livre de cuisine.
+                    </p>
+
+                    <!-- Search & Filter Bar inside Hero -->
+                    <div class="flex flex-col sm:flex-row gap-3 bg-white/10 backdrop-blur-md p-2.5 rounded-2xl border border-white/20">
+                        <div class="relative flex-grow">
+                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400"></i>
+                            <input v-model="searchQuery" type="text" placeholder="Chercher un plat, un ingrédient..." class="w-full pl-11 pr-4 py-2.5 bg-white/90 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium">
+                        </div>
+                        <select v-model="selectedCategory" class="bg-white/90 text-slate-800 font-medium px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            <option value="">Toutes catégories</option>
+                            <option value="Entrée">Entrées</option>
+                            <option value="Plat">Plats Principaux</option>
+                            <option value="Dessert">Desserts</option>
+                            <option value="Rapide">Express (&lt; 20 min)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="absolute -right-10 -bottom-10 opacity-20 pointer-events-none text-brand-500 text-[260px]">
+                    <i class="fa-solid fa-bowl-food"></i>
+                </div>
+            </div>
+
+            <!-- Page Titles Depending on Active Tab -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">
+                        <span v-if="currentTab === 'home'">Toutes les Recettes</span>
+                        <span v-else-if="currentTab === 'my-recipes'">Mes Recettes Publiées</span>
+                        <span v-else-if="currentTab === 'favorites'">Mes Recettes Favorites</span>
+                    </h2>
+                    <p class="text-slate-500 text-sm mt-1">
+                        {{ filteredRecipes.length }} recette(s) disponible(s)
+                    </p>
+                </div>
+
+                <!-- Category Pills Quick Filter -->
+                <div class="flex flex-wrap gap-2">
+                    <button @click="selectedCategory = ''" :class="categoryPillStyle('')">Toutes</button>
+                    <button @click="selectedCategory = 'Entrée'" :class="categoryPillStyle('Entrée')">🥗 Entrées</button>
+                    <button @click="selectedCategory = 'Plat'" :class="categoryPillStyle('Plat')">🍝 Plats</button>
+                    <button @click="selectedCategory = 'Dessert'" :class="categoryPillStyle('Dessert')">🍰 Desserts</button>
+                    <button @click="selectedCategory = 'Rapide'" :class="categoryPillStyle('Rapide')">⚡ Express</button>
+                </div>
+            </div>
+
+            <!-- Recipe Grid -->
+            <div v-if="filteredRecipes.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <article v-for="recipe in filteredRecipes" :key="recipe.id" class="recipe-card bg-white rounded-3xl overflow-hidden border border-orange-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+                    <div>
+                        <!-- Card Image / Placeholder Header -->
+                        <div class="relative h-48 bg-gradient-to-tr from-amber-500 to-brand-600 overflow-hidden">
+                            <img v-if="recipe.imageUrl" :src="recipe.imageUrl" :alt="recipe.title" class="w-full h-full object-cover">
+                            <div v-else class="w-full h-full flex items-center justify-center text-white/40 text-6xl">
+                                <i class="fa-solid fa-utensils"></i>
+                            </div>
+                            
+                            <!-- Category Badge -->
+                            <span class="absolute top-4 left-4 bg-white/90 backdrop-blur-md text-slate-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                                {{ recipe.category }}
+                            </span>
+
+                            <!-- Favorite Toggle Button -->
+                            <button @click.stop="toggleFavorite(recipe.id)" class="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-rose-500 shadow-sm hover:scale-110 transition-transform">
+                                <i :class="isFavorite(recipe.id) ? 'fa-solid fa-heart text-lg' : 'fa-regular fa-heart text-lg'"></i>
+                            </button>
+                        </div>
+
+                        <!-- Card Content -->
+                        <div class="p-6">
+                            <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+                                <span class="flex items-center font-medium">
+                                    <i class="fa-regular fa-clock text-brand-500 mr-1.5"></i> {{ recipe.prepTime }} min
+                                </span>
+                                <span class="flex items-center text-amber-500 font-bold">
+                                    <i class="fa-solid fa-star mr-1"></i> {{ calculateAverageRating(recipe) }} ({{ recipe.reviews ? recipe.reviews.length : 0 }})
+                                </span>
+                            </div>
+
+                            <h3 class="text-xl font-bold text-slate-900 mb-2 line-clamp-1 hover:text-brand-600 cursor-pointer" @click="openRecipeDetail(recipe)">
+                                {{ recipe.title }}
+                            </h3>
+
+                            <p class="text-slate-600 text-sm line-clamp-2 mb-4 leading-relaxed">
+                                {{ recipe.instructions }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Card Footer & Actions -->
+                    <div class="px-6 pb-6 pt-0 border-t border-slate-50 flex items-center justify-between">
+                        <div class="flex items-center space-x-2 text-xs text-slate-500">
+                            <div class="w-6 h-6 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold">
+                                {{ recipe.author.charAt(0).toUpperCase() }}
+                            </div>
+                            <span>Par <strong class="text-slate-700 font-semibold">{{ recipe.author }}</strong></span>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <button @click="openRecipeDetail(recipe)" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-semibold text-xs px-3 py-2 rounded-xl transition-colors">
+                                Voir
+                            </button>
+                            <template v-if="currentUser && currentUser.username === recipe.author">
+                                <button @click="editRecipe(recipe)" title="Modifier" class="text-slate-400 hover:text-brand-600 p-1.5">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button @click="deleteRecipe(recipe.id)" title="Supprimer" class="text-slate-400 hover:text-rose-600 p-1.5">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else class="bg-white rounded-3xl p-12 text-center border border-dashed border-amber-200 my-8">
+                <div class="w-20 h-20 bg-amber-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-3xl mb-4">
+                    <i class="fa-solid fa-cookie-bite"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">Aucune recette trouvée</h3>
+                <p class="text-slate-500 max-w-md mx-auto mb-6">
+                    Essayez de modifier votre recherche ou ajoutez votre propre recette pour enrichir le carnet communautaire.
+                </p>
+                <button @click="openCreateModal" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-md shadow-brand-500/20">
+                    Ajouter une recette
+                </button>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 text-slate-400 py-8 border-t border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
+                <p>© 2026 GourmetCraft - Projet Web Vue.js / Express & MySQL (Université Paris / CPUT)</p>
+            </div>
+        </footer>
+
+        <!-- Modal 1: Recipe Detail View -->
+        <div v-if="selectedRecipe" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative">
+                <!-- Close Button -->
+                <button @click="selectedRecipe = null" class="absolute top-4 right-4 z-10 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center text-slate-700 hover:bg-white shadow-md">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+
+                <!-- Hero Header -->
+                <div class="h-64 sm:h-80 bg-gradient-to-tr from-brand-600 to-amber-500 relative">
+                    <img v-if="selectedRecipe.imageUrl" :src="selectedRecipe.imageUrl" :alt="selectedRecipe.title" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                    <div class="absolute bottom-6 left-6 right-6 text-white">
+                        <span class="bg-brand-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                            {{ selectedRecipe.category }}
+                        </span>
+                        <h2 class="text-2xl sm:text-4xl font-extrabold mt-2">{{ selectedRecipe.title }}</h2>
+                        <div class="flex items-center space-x-4 text-xs sm:text-sm text-slate-200 mt-2">
+                            <span><i class="fa-regular fa-clock mr-1 text-amber-400"></i> {{ selectedRecipe.prepTime }} minutes</span>
+                            <span><i class="fa-solid fa-user mr-1 text-amber-400"></i> {{ selectedRecipe.author }}</span>
+                            <span><i class="fa-solid fa-star mr-1 text-amber-400"></i> {{ calculateAverageRating(selectedRecipe) }} / 5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 sm:p-8 space-y-8">
+                    <!-- Ingredients List -->
+                    <div>
+                        <h4 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                            <i class="fa-solid fa-basket-shopping text-brand-500 mr-2"></i> Ingrédients
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-amber-50/50 p-4 rounded-2xl border border-amber-100">
+                            <label v-for="(ingredient, idx) in formatList(selectedRecipe.ingredients)" :key="idx" class="flex items-center space-x-3 text-slate-700 text-sm cursor-pointer select-none">
+                                <input type="checkbox" class="w-4 h-4 text-brand-500 rounded border-slate-300 focus:ring-brand-500">
+                                <span>{{ ingredient }}</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div>
+                        <h4 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                            <i class="fa-solid fa-list-ol text-brand-500 mr-2"></i> Préparation étape par étape
+                        </h4>
+                        <ol class="space-y-4">
+                            <li v-for="(step, idx) in formatList(selectedRecipe.instructions)" :key="idx" class="flex items-start space-x-3">
+                                <span class="w-7 h-7 bg-brand-100 text-brand-700 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">
+                                    {{ idx + 1 }}
+                                </span>
+                                <p class="text-slate-700 text-sm leading-relaxed">{{ step }}</p>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <!-- Reviews & Comments Section -->
+                    <div class="border-t border-slate-100 pt-6">
+                        <h4 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                            <i class="fa-solid fa-comments text-brand-500 mr-2"></i> Avis de la communauté ({{ selectedRecipe.reviews ? selectedRecipe.reviews.length : 0 }})
+                        </h4>
+
+                        <!-- Add Review Form -->
+                        <form @submit.prevent="addReview" class="bg-slate-50 p-4 rounded-2xl mb-6">
+                            <label class="block text-xs font-semibold text-slate-600 mb-2">Laissez votre évaluation :</label>
+                            <div class="flex items-center space-x-2 mb-3">
+                                <button type="button" v-for="star in 5" :key="star" @click="newReviewRating = star" class="text-xl">
+                                    <i :class="star <= newReviewRating ? 'fa-solid fa-star text-amber-400' : 'fa-regular fa-star text-slate-300'"></i>
+                                </button>
+                            </div>
+                            <textarea v-model="newReviewComment" rows="2" placeholder="Ex: Délicieux ! J'ai ajouté une pointe de cannelle..." class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 mb-3"></textarea>
+                            <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs px-4 py-2 rounded-xl transition-all">
+                                Publier mon avis
+                            </button>
+                        </form>
+
+                        <!-- Existing Reviews -->
+                        <div class="space-y-3">
+                            <div v-for="rev in selectedRecipe.reviews" :key="rev.id" class="p-3 bg-white border border-slate-100 rounded-xl">
+                                <div class="flex justify-between items-center text-xs mb-1">
+                                    <span class="font-bold text-slate-800">{{ rev.author }}</span>
+                                    <span class="text-amber-500 font-bold"><i class="fa-solid fa-star mr-1"></i> {{ rev.rating }}/5</span>
+                                </div>
+                                <p class="text-xs text-slate-600">{{ rev.comment }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal 2: Create / Edit Recipe Form -->
+        <div v-if="showFormModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative">
+                <button @click="showFormModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+
+                <h3 class="text-2xl font-bold text-slate-900 mb-6">
+                    {{ editingRecipeId ? 'Modifier la recette' : 'Publier une nouvelle recette' }}
+                </h3>
+
+                <form @submit.prevent="saveRecipe" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Titre de la recette *</label>
+                        <input v-model="formRecipe.title" required type="text" placeholder="Ex: Moussaka traditionnelle" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Catégorie</label>
+                            <select v-model="formRecipe.category" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm bg-white">
+                                <option value="Entrée">Entrée</option>
+                                <option value="Plat">Plat Principal</option>
+                                <option value="Dessert">Dessert</option>
+                                <option value="Rapide">Express (&lt; 20 min)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Temps de prép. (minutes) *</label>
+                            <input v-model.number="formRecipe.prepTime" required type="number" min="1" placeholder="30" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">URL de l'image (optionnel)</label>
+                        <input v-model="formRecipe.imageUrl" type="url" placeholder="https://images.unsplash.com/..." class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Ingrédients (séparés par des virgules) *</label>
+                        <textarea v-model="formRecipe.ingredients" required rows="3" placeholder="200g de farine, 3 œufs, 100g de beurre..." class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Instructions de préparation *</label>
+                        <textarea v-model="formRecipe.instructions" required rows="4" placeholder="Étape 1: Préchauffer le four. Étape 2: Mélanger le tout..." class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm"></textarea>
+                    </div>
+
+                    <div class="flex justify-end space-x-3 pt-4 border-t">
+                        <button type="button" @click="showFormModal = false" class="px-5 py-2.5 text-slate-600 font-semibold text-sm hover:bg-slate-100 rounded-xl">Annuler</button>
+                        <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-2.5 rounded-xl shadow-md shadow-brand-500/20 text-sm">
+                            Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal 3: Auth Modal (Connexion / Inscription) -->
+        <div v-if="showAuthModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl relative">
+                <button @click="showAuthModal = false" class="absolute top-4 right-4 text-slate-400">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+                <h3 class="text-2xl font-bold text-slate-900 mb-2">Bienvenue !</h3>
+                <p class="text-slate-500 text-sm mb-6">Connectez-vous pour ajouter vos recettes et vos favoris.</p>
+
+                <form @submit.prevent="login" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Nom d'utilisateur</label>
+                        <input v-model="authUsername" required type="text" placeholder="Ex: Chef_Marie" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Mot de passe</label>
+                        <input v-model="authPassword" required type="password" placeholder="••••••••" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    </div>
+                    <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-all shadow-md">
+                        Se connecter / S'inscrire
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Vue App Script -->
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    currentTab: 'home',
+                    searchQuery: '',
+                    selectedCategory: '',
+                    showFormModal: false,
+                    showAuthModal: false,
+                    selectedRecipe: null,
+                    editingRecipeId: null,
+                    
+                    // Auth state
+                    currentUser: { username: 'Chef_Lucas', id: 1 },
+                    authUsername: '',
+                    authPassword: '',
+
+                    // Favorites array of IDs
+                    favorites: [1, 3],
+
+                    // Recipe Form state
+                    formRecipe: {
+                        title: '',
+                        category: 'Plat',
+                        prepTime: 25,
+                        imageUrl: '',
+                        ingredients: '',
+                        instructions: ''
+                    },
+
+                    // Review Form state inside modal
+                    newReviewRating: 5,
+                    newReviewComment: '',
+
+                    // Seeded Recipes Data
+                    recipes: [
+                        {
+                            id: 1,
+                            title: 'Tarte Tatin Traditionnelle',
+                            category: 'Dessert',
+                            prepTime: 45,
+                            author: 'Chef_Lucas',
+                            imageUrl: 'https://images.unsplash.com/photo-1568571780765-9276ac8b75a2?auto=format&fit=crop&w=800&q=80',
+                            ingredients: '6 pommes Golden, 150g de sucre, 80g de beurre demi-sel, 1 pâte feuilletée pur beurre',
+                            instructions: 'Éplucher et couper les pommes en gros quartiers. Préparer un caramel ambré dans un moule à tatin avec le beurre et le sucre. Disposer les pommes harmonieusement. Recouvrir de pâte feuilletée. Enfourner 35 minutes à 180°C puis démouler chaud.',
+                            reviews: [
+                                { id: 1, author: 'Sophie', rating: 5, comment: 'Un vrai délice, caramel parfait !' }
+                            ]
+                        },
+                        {
+                            id: 2,
+                            title: 'Pâtes Carbonara Authentiques',
+                            category: 'Rapide',
+                            prepTime: 15,
+                            author: 'Marco_Pasta',
+                            imageUrl: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&w=800&q=80',
+                            ingredients: '400g de Spaghetti, 150g de Guanciale (ou pancetta), 4 jaunes d\'œufs, 100g de Pecorino Romano râpé, Poivre noir fraîchement moulu',
+                            instructions: 'Faire revenir le guanciale jusqu\'à ce qu\'il soit croustillant. Cuire les pâtes al dente. Mélanger les jaunes d\'œufs et le pecorino. Mélanger les pâtes hors du feu avec le gras du guanciale et la sauce aux œufs en ajoutant une louche d\'eau de cuisson.',
+                            reviews: [
+                                { id: 1, author: 'Chef_Lucas', rating: 5, comment: 'Merci d\'avoir évité la crème fraîche !' }
+                            ]
+                        },
+                        {
+                            id: 3,
+                            title: 'Poulet Yassa Sénégalais',
+                            category: 'Plat',
+                            prepTime: 60,
+                            author: 'Awa_Cuisine',
+                            imageUrl: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=800&q=80',
+                            ingredients: '1 poulet découpé, 1kg d\'oignons, 4 citrons verts, 3 gousses d\'ail, Moutarde de Dijon, Piment, Riz blanc pour le service',
+                            instructions: 'Faire mariner le poulet et les oignons dans le jus de citron, la moutarde, l\'ail et les épices pendant 2 heures. Faire griller le poulet au four ou au barbecue. Faire confire les oignons à la poêle puis réincorporer le poulet. Servir bien chaud avec du riz.',
+                            reviews: []
+                        },
+                        {
+                            id: 4,
+                            title: 'Salade César au Poulet Grillé',
+                            category: 'Entrée',
+                            prepTime: 20,
+                            author: 'Chef_Lucas',
+                            imageUrl: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?auto=format&fit=crop&w=800&q=80',
+                            ingredients: '1 salade romaine, 2 blancs de poulet, Croûtons dorés à l\'ail, Parmigiano Reggiano en copeaux, Sauce César maison (ancois, mayonnaise, citron)',
+                            instructions: 'Faire griller les blancs de poulet puis les trancher. Laver et couper la salade. Assembler la salade avec les croûtons, le poulet et les copeaux de parmesan. Napper généreusement de sauce César.',
+                            reviews: []
+                        }
+                    ]
+                }
+            },
+            computed: {
+                favoriteCount() {
+                    return this.favorites.length;
+                },
+                filteredRecipes() {
+                    return this.recipes.filter(r => {
+                        const matchesTab = 
+                            this.currentTab === 'home' ||
+                            (this.currentTab === 'my-recipes' && this.currentUser && r.author === this.currentUser.username) ||
+                            (this.currentTab === 'favorites' && this.favorites.includes(r.id));
+
+                        const matchesSearch = r.title.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
+                                              r.ingredients.toLowerCase().includes(this.searchQuery.toLowerCase());
+
+                        const matchesCat = !this.selectedCategory || r.category === this.selectedCategory;
+
+                        return matchesTab && matchesSearch && matchesCat;
+                    });
+                }
+            },
+            methods: {
+                navBtnStyle(tab) {
+                    return this.currentTab === tab 
+                        ? 'flex items-center space-x-2 bg-white text-brand-600 font-bold px-4 py-2 rounded-xl shadow-sm text-sm'
+                        : 'flex items-center space-x-2 text-slate-600 hover:text-brand-600 font-medium px-4 py-2 rounded-xl text-sm transition-colors';
+                },
+                mobileNavStyle(tab) {
+                    return this.currentTab === tab 
+                        ? 'text-brand-600 flex flex-col items-center font-bold'
+                        : 'text-slate-400 flex flex-col items-center font-medium';
+                },
+                categoryPillStyle(cat) {
+                    return this.selectedCategory === cat
+                        ? 'bg-brand-500 text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-sm'
+                        : 'bg-white text-slate-600 hover:bg-amber-100 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-amber-200/60 transition-colors';
+                },
+                isFavorite(id) {
+                    return this.favorites.includes(id);
+                },
+                toggleFavorite(id) {
+                    if (this.isFavorite(id)) {
+                        this.favorites = this.favorites.filter(favId => favId !== id);
+                    } else {
+                        this.favorites.push(id);
+                    }
+                },
+                calculateAverageRating(recipe) {
+                    if (!recipe.reviews || recipe.reviews.length === 0) return '5.0';
+                    const sum = recipe.reviews.reduce((acc, curr) => acc + curr.rating, 0);
+                    return (sum / recipe.reviews.length).toFixed(1);
+                },
+                formatList(text) {
+                    if (!text) return [];
+                    return text.split(/,|\n/).map(item => item.trim()).filter(item => item.length > 0);
+                },
+                openRecipeDetail(recipe) {
+                    this.selectedRecipe = recipe;
+                    this.newReviewRating = 5;
+                    this.newReviewComment = '';
+                },
+                openCreateModal() {
+                    if (!this.currentUser) {
+                        this.showAuthModal = true;
+                        return;
+                    }
+                    this.editingRecipeId = null;
+                    this.formRecipe = { title: '', category: 'Plat', prepTime: 25, imageUrl: '', ingredients: '', instructions: '' };
+                    this.showFormModal = true;
+                },
+                editRecipe(recipe) {
+                    this.editingRecipeId = recipe.id;
+                    this.formRecipe = { ...recipe };
+                    this.showFormModal = true;
+                },
+                saveRecipe() {
+                    if (this.editingRecipeId) {
+                        const index = this.recipes.findIndex(r => r.id === this.editingRecipeId);
+                        if (index !== -1) {
+                            this.recipes[index] = { ...this.recipes[index], ...this.formRecipe };
+                        }
+                    } else {
+                        const newId = Date.now();
+                        this.recipes.unshift({
+                            id: newId,
+                            ...this.formRecipe,
+                            author: this.currentUser.username,
+                            reviews: []
+                        });
+                    }
+                    this.showFormModal = false;
+                },
+                deleteRecipe(id) {
+                    this.recipes = this.recipes.filter(r => r.id !== id);
+                    this.favorites = this.favorites.filter(favId => favId !== id);
+                },
+                addReview() {
+                    if (!this.newReviewComment.trim()) return;
+                    if (!this.selectedRecipe.reviews) this.selectedRecipe.reviews = [];
+                    
+                    this.selectedRecipe.reviews.push({
+                        id: Date.now(),
+                        author: this.currentUser ? this.currentUser.username : 'Gourmand_Anonyme',
+                        rating: this.newReviewRating,
+                        comment: this.newReviewComment
+                    });
+                    this.newReviewComment = '';
+                },
+                login() {
+                    if (this.authUsername) {
+                        this.currentUser = { username: this.authUsername, id: Date.now() };
+                        this.showAuthModal = false;
+                    }
+                },
+                logout() {
+                    this.currentUser = null;
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
