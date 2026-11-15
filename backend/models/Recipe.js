@@ -30,7 +30,7 @@ const Recipe = sequelize.define('Recipe', {
   }
 });
 
-User.hasMany(Recipe, { onDelete: 'CASCADE' });
-Recipe.belongsTo(User);
+User.hasMany(Recipe, { foreignKey: 'userId', onDelete: 'CASCADE' });
+Recipe.belongsTo(User, { foreignKey: 'userId' });
 
-module.exports = Recipe;
+module.exports = { User, Recipe };
