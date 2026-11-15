@@ -16,6 +16,10 @@
       </div>
     </div>
 
+    <div v-if="recipes.length === 0" class="empty">
+      Aucune recette publiée pour le moment. Soyez le premier !
+    </div>
+
     <div class="recipe-grid">
       <RecipeCard 
         v-for="recipe in filteredRecipes" 
@@ -28,18 +32,31 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import RecipeCard from '../components/RecipeCard.vue'
 
 const selectedCategory = ref('')
 const onlyFavorites = ref(false)
+const recipes = ref([])
 
-// Données de test (à remplacer plus tard par un fetch('http://localhost:3000/api/recipes'))
-const recipes = ref([
-  { id: 1, title: 'Pâtes Carbonara Traditionnelles', category: 'Plat', prep_time: 20, author_name: 'Marco', isFavorite: true },
-  { id: 2, title: 'Mousse au Chocolat Noir', category: 'Dessert', prep_time: 15, author_name: 'Claire', isFavorite: false },
-  { id: 3, title: 'Bruschetta Tomates Basilic', category: 'Entrée', prep_time: 10, author_name: 'Lucas', isFavorite: false }
-])
+const fetchRecipes = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/api/recipes')
+    const data = await response.json()
+    
+    // Adaptation des noms de champs Sequelize vers ceux attendus par RecipeCard
+    recipes.value = data.map(r => ({
+      ...r,
+      prep_time: r.prepTime,
+      author_name: r.User ? r.User.username : 'Chef anonyme',
+      isFavorite: false
+    }))
+  } catch (error) {
+    console.error('Erreur lors du chargement des recettes :', error)
+  }
+}
+
+onMounted(fetchRecipes)
 
 const filteredRecipes = computed(() => {
   return recipes.value.filter(r => {
@@ -56,26 +73,9 @@ const toggleFavorite = (id) => {
 </script>
 
 <style scoped>
-.filters {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 2rem;
-}
-.filter-controls {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-select {
-  padding: 0.5rem;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-.recipe-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-}
+.filters { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 2rem; }
+.filter-controls { display: flex; gap: 1rem; align-items: center; }
+select { padding: 0.5rem; border-radius: 5px; border: 1px solid #ccc; }
+.recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+.empty { text-align: center; color: #666; margin-top: 2rem; }
 </style>
