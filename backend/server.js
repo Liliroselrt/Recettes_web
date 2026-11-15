@@ -1,13 +1,13 @@
+const dotenv = require('dotenv');
+dotenv.config(); 
+
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const sequelize = require('./config/database');
 
 const authRoutes = require('./routes/authRoutes');
 const recipeRoutes = require('./routes/recipeRoutes');
-const { User, Recipe } = require('./models/Recipe'); 
-
-dotenv.config();
+require('./models/Recipe'); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,18 +32,3 @@ sequelize.sync({ alter: true })
   .catch(err => {
     console.error('❌ Erreur de connexion MySQL :', err);
   });
-
-
-async function initDb() {
-  try {
-    await sequelize.authenticate();
-    console.log('Connexion à MySQL réussie.');
-
-    await sequelize.sync({ alter: true });
-    console.log('Base de données synchronisée.');
-  } catch (error) {
-    console.error('Impossible de se connecter à la base de données :', error);
-  }
-}
-
-initDb();

@@ -26,24 +26,33 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import CommentSection from '../components/CommentSection.vue'
 
 const route = useRoute()
+const recipe = ref(null)
 
-// Simulation de récupération via route.params.id (GET /api/recipes/:id)
-const recipe = ref({
-  id: route.params.id,
-  title: 'Pâtes Carbonara Traditionnelles',
-  category: 'Plat',
-  prep_time: 20,
-  author_name: 'Marco',
-  ingredients: '400g de spaghettis\n150g de guanciale\n4 jaunes d\'oeufs\n100g de pecorino romano\nPoivre noir',
-  instructions: '1. Faites bouillir une grande casserole d\'eau salée.\n2. Coupez le guanciale en lardons et faites-le revenir à la poêle sans matière grasse.\n3. Mélangez les jaunes d\'oeufs et le pecorino râpé dans un bol.\n4. Mélangez les pâtes cuites avec le guanciale et la crème d\'oeufs hors du feu.'
+onMounted(async () => {
+  try {
+    const response = await fetch('http://localhost:3000/api/recipes')
+    const data = await response.json()
+    const found = data.find(r => r.id === Number(route.params.id))
+
+    if (found) {
+      recipe.value = {
+        ...found,
+        prep_time: found.prepTime,
+        author_name: found.User ? found.User.username : 'Chef anonyme'
+      }
+    }
+  } catch (error) {
+    console.error('Erreur chargement détail recette :', error)
+  }
 })
 
 const formattedIngredients = computed(() => {
+  if (!recipe.value || !recipe.value.ingredients) return []
   return recipe.value.ingredients.split('\n').filter(line => line.trim() !== '')
 })
 </script>

@@ -2,6 +2,8 @@
   <div class="auth-container">
     <form @submit.prevent="handleLogin" class="auth-form">
       <h2>Connexion</h2>
+      <p v-if="errorMessage" class="error-msg">{{ errorMessage }}</p>
+
       <label>Email</label>
       <input v-model="email" type="email" required placeholder="chef@exemple.com" />
       
@@ -16,18 +18,39 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
 const email = ref('')
 const password = ref('')
+const errorMessage = ref('')
 
-const handleLogin = () => {
-  // Simulation de connexion réussie (à remplacer par POST /api/auth/login)
-  localStorage.setItem('token', 'faux-jwt-token-de-test')
-  localStorage.setItem('userId', '1')
-  // Recharge pour mettre à jour la Navbar et redirige vers le carnet
-  window.location.href = '/dashboard'
+const handleLogin = async () => {
+  errorMessage.value = ''
+  try {
+    const response = await fetch('http://localhost:3000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email.value,
+        password: password.value
+      })
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      errorMessage.value = data.error || 'Identifiants incorrects.'
+      return
+    }
+
+    // Stockage du vrai token JWT et des infos de l'utilisateur
+    localStorage.setItem('token', data.token)
+    localStorage.setItem('userId', data.user.id)
+    localStorage.setItem('username', data.user.username)
+
+    window.location.href = '/dashboard'
+  } catch (error) {
+    errorMessage.value = 'Impossible de joindre le serveur.'
+  }
 }
 </script>
 
@@ -36,4 +59,5 @@ const handleLogin = () => {
 .auth-form { display: flex; flex-direction: column; gap: 1rem; }
 input { padding: 0.6rem; border: 1px solid #ccc; border-radius: 5px; }
 button { background: #ff6b6b; color: white; border: none; padding: 0.8rem; border-radius: 5px; font-weight: bold; cursor: pointer; }
+.error-msg { color: #d63031; background: #ffeaea; padding: 0.6rem; border-radius: 5px; font-size: 0.9rem; margin: 0; }
 </style>
