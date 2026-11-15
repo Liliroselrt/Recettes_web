@@ -5,6 +5,7 @@ const sequelize = require('./config/database');
 
 const authRoutes = require('./routes/authRoutes');
 const recipeRoutes = require('./routes/recipeRoutes');
+const { User, Recipe } = require('./models/Recipe'); 
 
 dotenv.config();
 
@@ -31,3 +32,18 @@ sequelize.sync({ alter: true })
   .catch(err => {
     console.error('❌ Erreur de connexion MySQL :', err);
   });
+
+
+async function initDb() {
+  try {
+    await sequelize.authenticate();
+    console.log('Connexion à MySQL réussie.');
+
+    await sequelize.sync({ alter: true });
+    console.log('Base de données synchronisée.');
+  } catch (error) {
+    console.error('Impossible de se connecter à la base de données :', error);
+  }
+}
+
+initDb();
