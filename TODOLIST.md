@@ -1,7 +1,7 @@
 # projet_web
  To do list :
- - update the visuals of the website
- - add a connexion between our different local sql databases
+ - update the visuals of the website (Cyprien we're waiting plz)
+ - add a connexion between our different local sql databases (Need help from the prof)
  - add the monetized options :
    - video locked behind a paywall
    - fined request for recipes
