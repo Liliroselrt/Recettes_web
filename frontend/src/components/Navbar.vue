@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar">
     <div class="nav-brand">
-      <RouterLink to="/">🍳 Ef'recipes</RouterLink>
+      <RouterLink to="/"> Ef'recipes</RouterLink>
     </div>
     <div class="nav-links">
       <RouterLink to="/">Explore</RouterLink>
@@ -14,6 +14,7 @@
         <RouterLink to="/register" class="btn-register">Sign up</RouterLink>
       </template>
     </div>
+  
   </nav>
 </template>
 
@@ -75,4 +76,5 @@ const logout = () => {
   border-radius: 5px;
   cursor: pointer;
 }
+
 </style>
