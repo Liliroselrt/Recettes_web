@@ -1,19 +1,20 @@
 <template>
   <nav class="navbar">
     <div class="nav-brand">
-      <RouterLink to="/">🍳 Marmit'Code</RouterLink>
+      <RouterLink to="/"> Ef'recipes</RouterLink>
     </div>
     <div class="nav-links">
-      <RouterLink to="/">Explorer</RouterLink>
+      <RouterLink to="/">Explore</RouterLink>
       <template v-if="isLoggedIn">
-        <RouterLink to="/dashboard">Mon Carnet</RouterLink>
+        <RouterLink to="/dashboard">My book</RouterLink>
         <button @click="logout" class="btn-logout">Déconnexion</button>
       </template>
       <template v-else>
-        <RouterLink to="/login">Connexion</RouterLink>
-        <RouterLink to="/register" class="btn-register">Inscription</RouterLink>
+        <RouterLink to="/login">Login</RouterLink>
+        <RouterLink to="/register" class="btn-register">Sign up</RouterLink>
       </template>
     </div>
+  
   </nav>
 </template>
 
@@ -41,7 +42,7 @@ const logout = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ff6b6b;
+  background-color: #21773b;
   padding: 1rem 2rem;
   color: white;
 }
@@ -63,7 +64,7 @@ const logout = () => {
 }
 .btn-register {
   background: white;
-  color: #ff6b6b !important;
+  color: #1b592e !important;
   padding: 0.4rem 0.8rem;
   border-radius: 5px;
 }
@@ -75,4 +76,5 @@ const logout = () => {
   border-radius: 5px;
   cursor: pointer;
 }
+
 </style>

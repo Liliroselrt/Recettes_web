@@ -58,6 +58,6 @@ const handleLogin = async () => {
 .auth-container { max-width: 400px; margin: 3rem auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 .auth-form { display: flex; flex-direction: column; gap: 1rem; }
 input { padding: 0.6rem; border: 1px solid #ccc; border-radius: 5px; }
-button { background: #ff6b6b; color: white; border: none; padding: 0.8rem; border-radius: 5px; font-weight: bold; cursor: pointer; }
+button { background: #21773b; color: white; border: none; padding: 0.8rem; border-radius: 5px; font-weight: bold; cursor: pointer; }
 .error-msg { color: #d63031; background: #ffeaea; padding: 0.6rem; border-radius: 5px; font-size: 0.9rem; margin: 0; }
 </style>
