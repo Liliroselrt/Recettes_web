@@ -1,0 +1,326 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   GourmetCraft - thème orange (palette `brand`) + composants réutilisables.
+   Tailwind v4 gère la mise en page ; ce fichier définit les composants
+   partagés (boutons, pills, champs, cartes, carousel...).
+   ========================================================================== */
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-50: #fff7ed;
+  --color-brand-100: #ffedd5;
+  --color-brand-200: #fed7aa;
+  --color-brand-300: #fdba74;
+  --color-brand-400: #fb923c;
+  --color-brand-500: #f97316;
+  --color-brand-600: #ea580c;
+  --color-brand-700: #c2410c;
+  --color-brand-800: #9a3412;
+  --color-brand-900: #7c2d12;
+}
+
+@layer base {
+  button { cursor: pointer; }
+}
+
+/* Les composants du design sont dans la couche `components` : les classes utilitaires
+   Tailwind (w-20, flex-1, !bg-amber-100...) gardent ainsi la priorité sur eux, comme dans
+   la maquette d'origine où Tailwind était chargé via le CDN. */
+@layer components {
+/* ---------- 1. Variables (same values as js/tailwind-config.js) ---------- */
+:root {
+    --brand-50: #fff7ed;
+    --brand-100: #ffedd5;
+    --brand-200: #fed7aa;
+    --brand-300: #fdba74;
+    --brand-400: #fb923c;
+    --brand-500: #f97316;
+    --brand-600: #ea580c;
+    --brand-700: #c2410c;
+    --brand-800: #9a3412;
+    --brand-900: #7c2d12;
+    --amber-500: #f59e0b;
+    --amber-600: #d97706;
+    --ink: #1e293b;
+    --success: #16a34a;
+    --ring: 0 0 0 3px rgba(249, 115, 22, 0.35);
+}
+
+/* ---------- 2. Base ---------- */
+body { -webkit-font-smoothing: antialiased; }
+:focus-visible { outline: 2px solid var(--brand-500); outline-offset: 2px; }
+input[type="checkbox"] { accent-color: var(--brand-500); }
+* { scrollbar-width: thin; scrollbar-color: var(--brand-300) transparent; }
+
+/* ---------- 3. Header and cards ---------- */
+/* Semi-transparent blurred header */
+.glass-header {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px);
+}
+
+/* Desktop and mobile navigation tabs */
+.nav-tab {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 0.875rem; font-weight: 600; color: #475569;
+    padding: 0.5rem 1rem; border-radius: 0.75rem; transition: all 0.15s ease;
+}
+.nav-tab:hover { color: var(--brand-600); background: rgba(255, 255, 255, 0.7); }
+.nav-tab-active, .nav-tab-active:hover {
+    background: #fff; color: var(--brand-600); font-weight: 700;
+    box-shadow: 0 1px 4px rgba(124, 45, 18, 0.18);
+}
+.mobile-tab {
+    display: flex; flex-direction: column; align-items: center; gap: 0.125rem;
+    color: #94a3b8; font-weight: 500; padding: 0.25rem 0.5rem; border-radius: 0.75rem;
+}
+.mobile-tab-active, .mobile-tab-create { color: var(--brand-600); font-weight: 700; }
+
+/* Recipe cards: lift effect and orange border when hovered */
+.recipe-card { cursor: pointer; transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
+.recipe-card:focus-within { border-color: var(--brand-400); }
+.recipe-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--brand-300);
+    box-shadow: 0 14px 30px rgba(124, 45, 18, 0.14);
+}
+
+/* Round favorite button on the card picture */
+.fav-btn {
+    width: 2.5rem; height: 2.5rem; border-radius: 9999px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, 0.95); color: #e11d48;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); transition: transform 0.15s ease;
+}
+.fav-btn:hover { transform: scale(1.12); }
+
+/* ---------- 4. Buttons (one system for the whole site) ---------- */
+.btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    font-size: 0.8125rem; font-weight: 700; line-height: 1;
+    padding: 0.625rem 1rem; border-radius: 0.875rem; border: 2px solid transparent;
+    cursor: pointer; white-space: nowrap; transition: all 0.15s ease;
+}
+.btn:focus-visible { outline: none; box-shadow: var(--ring); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; transform: none; }
+.btn-lg { font-size: 0.9rem; padding: 0.75rem 1.25rem; }
+.btn-sm { font-size: 0.75rem; padding: 0.5rem 0.8rem; border-radius: 0.75rem; }
+.btn-icon { width: 2.25rem; height: 2.25rem; padding: 0; border-radius: 0.75rem; }
+
+/* Main action: filled orange gradient (create, share, save, log in...) */
+.btn-primary {
+    color: #fff; border-color: transparent;
+    background-image: linear-gradient(135deg, var(--brand-500), var(--amber-500));
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.32);
+}
+.btn-primary:hover:not(:disabled) {
+    background-image: linear-gradient(135deg, var(--brand-600), var(--amber-600));
+    box-shadow: 0 6px 16px rgba(234, 88, 12, 0.4); transform: translateY(-1px);
+}
+/* Secondary action: white with orange outline (view, edit, cancel, unshare...) */
+.btn-secondary { color: var(--brand-700); background: #fff; border-color: var(--brand-300); }
+.btn-secondary:hover:not(:disabled) { background: var(--brand-50); border-color: var(--brand-500); color: var(--brand-800); }
+/* Destructive action */
+.btn-danger { color: #be123c; background: #fff; border-color: #fda4af; }
+.btn-danger:hover:not(:disabled) { background: #fff1f2; border-color: #e11d48; }
+
+/* Star rating buttons in the review form */
+.star-btn { font-size: 1.4rem; line-height: 1; padding: 0.4rem 0.3rem; border-radius: 0.6rem; transition: transform 0.1s ease; }
+.star-btn:hover { transform: scale(1.2); }
+
+/* Close button of the modals */
+.modal-close {
+    width: 2.5rem; height: 2.5rem; border-radius: 9999px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, 0.95); color: #334155;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); transition: all 0.15s ease;
+}
+.modal-close:hover { background: var(--brand-500); color: #fff; }
+
+/* ---------- 5. Pills, chips, badges, tags ---------- */
+/* Category filter */
+.pill {
+    font-size: 0.75rem; font-weight: 600; color: #475569; background: #fff;
+    padding: 0.4rem 0.9rem; border-radius: 9999px; border: 1.5px solid var(--brand-200);
+    transition: all 0.15s ease;
+}
+.pill:hover { background: var(--brand-50); border-color: var(--brand-400); color: var(--brand-700); }
+.pill-active, .pill-active:hover {
+    background: var(--brand-500); border-color: var(--brand-500); color: #fff; font-weight: 700;
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+}
+
+/* Basic ingredients toggles (dashed = not assumed, solid = assumed available) */
+.chip {
+    display: inline-flex; align-items: center; font-size: 0.75rem; font-weight: 600;
+    color: #475569; background: #fff; padding: 0.35rem 0.75rem; border-radius: 9999px;
+    border: 1.5px dashed var(--brand-300); transition: all 0.15s ease;
+}
+.chip:hover { border-color: var(--brand-500); }
+.chip-on { color: var(--brand-800); background: var(--brand-100); border: 1.5px solid var(--brand-400); }
+
+/* Badges on the card picture */
+.badge {
+    display: inline-flex; align-items: center; font-size: 0.75rem; font-weight: 700;
+    padding: 0.25rem 0.75rem; border-radius: 9999px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.badge-light { background: rgba(255, 255, 255, 0.94); color: #0f172a; }
+.badge-shared { background: var(--success); color: #fff; }
+.badge-private { background: var(--ink); color: #fff; }
+
+/* Small labels next to an ingredient */
+.tag {
+    display: inline-block; margin-left: 0.5rem; vertical-align: middle;
+    font-size: 0.6875rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 9999px;
+    background: #f1f5f9; color: #475569;
+}
+.tag-warn { background: var(--brand-100); color: var(--brand-800); }
+
+/* Pantry match line on a card */
+.match {
+    font-size: 0.75rem; font-weight: 700; padding: 0.4rem 0.75rem; margin-top: 0.75rem;
+    border-radius: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.match-ok { background: #f0fdf4; color: #166534; border: 1.5px solid #bbf7d0; }
+.match-warn { background: var(--brand-50); color: var(--brand-800); border: 1.5px solid var(--brand-200); }
+
+/* ---------- 6. Form fields ---------- */
+.field {
+    width: 100%; padding: 0.65rem 0.85rem; font-size: 0.875rem; color: var(--ink);
+    background: #fff; border: 1.5px solid var(--brand-200); border-radius: 0.875rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.field::placeholder { color: #94a3b8; }
+.field:hover { border-color: var(--brand-300); }
+.field:focus { outline: none; border-color: var(--brand-500); box-shadow: var(--ring); }
+.field:disabled { background: #f8fafc; color: #94a3b8; cursor: not-allowed; }
+.field-sm { padding: 0.45rem 0.65rem; font-size: 0.8125rem; border-radius: 0.75rem; }
+.field-auto { width: auto; }
+.field-label {
+    display: block; margin-bottom: 0.35rem; font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase; color: #475569;
+}
+
+/* ---------- 7. Ingredient rows (recipe modal) and pantry ---------- */
+.ing-list { background: #fff; border: 1.5px solid var(--brand-100); border-radius: 1rem; overflow: hidden; }
+.ing-row {
+    display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.9rem;
+    font-size: 0.875rem; color: #334155; background: #fff; border-bottom: 1px solid var(--brand-100);
+}
+.ing-row:last-child { border-bottom: 0; }
+.ing-text { flex: 1; min-width: 0; }
+.ing-add { flex: none; display: flex; align-items: center; gap: 0.4rem; }
+.ing-icon {
+    flex: none; width: 1.6rem; height: 1.6rem; border-radius: 9999px; font-size: 0.75rem;
+    display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #94a3b8;
+}
+/* have it: green check */
+.ing-ok { background: #f7fef9; }
+.ing-ok .ing-icon { background: var(--success); color: #fff; }
+/* basic ingredient (assumed available): soft green check */
+.ing-basic .ing-icon { background: #dcfce7; color: #15803d; }
+/* not enough: orange exclamation */
+.ing-short { background: var(--brand-50); }
+.ing-short .ing-icon { background: var(--brand-500); color: #fff; }
+/* missing (only highlighted once some ingredients are ticked in the pantry) */
+.ing-missing:not(.ing-idle) { background: var(--brand-50); }
+.ing-missing:not(.ing-idle) .ing-icon { background: var(--brand-100); color: var(--brand-700); }
+
+.pantry-item {
+    display: flex; align-items: stretch; background: #fff; border: 1.5px solid var(--brand-100);
+    border-radius: 0.875rem; transition: all 0.15s ease;
+}
+/* the whole row (not only the checkbox) ticks / unticks the ingredient */
+.pantry-label {
+    flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.625rem;
+    padding: 0.6rem 0.75rem; font-size: 0.875rem; color: #334155; cursor: pointer;
+}
+.pantry-qty { flex: none; display: flex; align-items: center; gap: 0.25rem; padding: 0.35rem 0.75rem 0.35rem 0; }
+.pantry-item:hover { border-color: var(--brand-300); }
+.pantry-item.on { background: #f0fdf4; border-color: #86efac; }
+
+/* ---------- 8. Alerts, panels, helpers ---------- */
+.notice {
+    display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.9rem;
+    font-size: 0.8125rem; font-weight: 600; padding: 0.65rem 0.9rem; border-radius: 0.875rem;
+}
+.notice-ok { background: #f0fdf4; color: #166534; border: 1.5px solid #86efac; }
+.notice-warn { background: var(--brand-50); color: var(--brand-800); border: 1.5px solid var(--brand-300); }
+
+.alert-error {
+    padding: 0.7rem 0.9rem; font-size: 0.8125rem; color: #9f1239;
+    background: #fff1f2; border: 1.5px solid #fda4af; border-radius: 0.875rem;
+}
+.alert-error li + li { margin-top: 0.25rem; }
+
+.panel {
+    background: #fff; border: 1.5px solid var(--brand-100); border-radius: 1.5rem;
+    box-shadow: 0 4px 20px rgba(124, 45, 18, 0.06);
+}
+
+/* ---------- 9. Image carousel, card comment, image form ---------- */
+.carousel { position: relative; }
+.carousel-btn {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+    width: 2.5rem; height: 2.5rem; border-radius: 9999px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, 0.95); color: var(--brand-700);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); opacity: 0;
+    transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.carousel-prev { left: 0.75rem; }
+.carousel-next { right: 0.75rem; }
+.carousel:hover .carousel-btn, .carousel:focus-within .carousel-btn, .carousel-visible .carousel-btn { opacity: 1; }
+.carousel-btn:hover { background: var(--brand-500); color: #fff; }
+.carousel-btn:focus-visible { outline: none; box-shadow: var(--ring); opacity: 1; }
+@media (hover: none) { .carousel-btn { opacity: 1; } }   /* touch screens have no hover */
+.carousel-count {
+    position: absolute; right: 0.75rem; bottom: 0.75rem; z-index: 2;
+    font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 9999px;
+    background: rgba(15, 23, 42, 0.78); color: #fff;
+}
+.carousel-count-top { top: 0.75rem; bottom: auto; left: 0.75rem; right: auto; }
+
+/* Comment shown on the recipe cards */
+.card-comment { border-left: 3px solid var(--brand-300); padding-left: 0.75rem; min-height: 3.25rem; }
+
+/* Tip box and thumbnails of the image section in the recipe form */
+.tip {
+    display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.7rem 0.9rem;
+    font-size: 0.8125rem; line-height: 1.45; color: var(--brand-900);
+    background: var(--brand-50); border: 1.5px solid var(--brand-200); border-radius: 0.875rem;
+}
+.thumb {
+    position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: #f1f5f9;
+    border: 1.5px solid var(--brand-200); border-radius: 0.75rem;
+}
+.thumb img { width: 100%; height: 100%; object-fit: cover; }
+.thumb-badge {
+    position: absolute; left: 0.35rem; bottom: 0.35rem; font-size: 0.65rem; font-weight: 700;
+    padding: 0.1rem 0.45rem; border-radius: 9999px; background: var(--brand-500); color: #fff;
+}
+.thumb-remove {
+    position: absolute; right: 0.3rem; top: 0.3rem; width: 1.5rem; height: 1.5rem; border-radius: 9999px;
+    display: flex; align-items: center; justify-content: center; font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.95); color: #be123c; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+.thumb-remove:hover { background: #be123c; color: #fff; }
+
+/* ---------- 10. Previous / next recipe arrows (recipe window) ---------- */
+.recipe-nav {
+    flex: none; width: 3.5rem; height: 3.5rem; border-radius: 9999px; font-size: 1.3rem; color: #fff;
+    background-image: linear-gradient(135deg, var(--brand-500), var(--amber-500));
+    border: 3px solid rgba(255, 255, 255, 0.95); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.recipe-nav:hover:not(:disabled) { transform: scale(1.1); background-image: linear-gradient(135deg, var(--brand-600), var(--amber-600)); }
+.recipe-nav:focus-visible { outline: none; box-shadow: var(--ring); }
+.recipe-nav:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; }   /* first / last recipe */
+.recipe-counter {
+    position: absolute; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 2; white-space: nowrap;
+    font-size: 0.7rem; font-weight: 700; padding: 0.25rem 0.75rem; border-radius: 9999px;
+    background: rgba(15, 23, 42, 0.78); color: #fff;
+}
+.tip code { font-size: 0.75rem; font-weight: 700; padding: 0.05rem 0.35rem; border-radius: 0.375rem; background: var(--brand-100); }
+}
