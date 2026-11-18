@@ -1,9 +1,9 @@
 <template>
   <div class="dashboard">
     <div class="dashboard-header">
-      <h1>Mon Livre de Recettes</h1>
+      <h1>My recipe book</h1>
       <button @click="openCreateForm" class="btn-new">
-        {{ showForm ? 'Fermer le formulaire' : '+ Nouvelle Recette' }}
+        {{ showForm ? 'Close the form' : '+ New Recipe' }}
       </button>
     </div>
 
@@ -14,9 +14,9 @@
       />
     </div>
 
-    <h2>Mes recettes publiées ({{ myRecipes.length }})</h2>
+    <h2>My published recipe ({{ myRecipes.length }})</h2>
     <div v-if="myRecipes.length === 0" class="empty">
-      Vous n'avez pas encore publié de recette.
+      You haven't published any recipe yet.
     </div>
 
     <div class="my-recipes-list">

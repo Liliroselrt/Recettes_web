@@ -1,23 +1,23 @@
 <template>
   <div class="home">
     <div class="filters">
-      <h1>Toutes les recettes de la communauté</h1>
+      <h1>All the community's recipes</h1>
       <div class="filter-controls">
         <select v-model="selectedCategory">
-          <option value="">Toutes les catégories</option>
-          <option value="Entrée">Entrées</option>
-          <option value="Plat">Plats</option>
+          <option value="">All categories</option>
+          <option value="Entrée">Starters</option>  
+          <option value="Plat">Main courses</option>
           <option value="Dessert">Desserts</option>
         </select>
         <label class="fav-filter">
           <input type="checkbox" v-model="onlyFavorites" />
-          Mes favoris uniquement ❤️
+          ❤️ Only my favorites
         </label>
       </div>
     </div>
 
     <div v-if="recipes.length === 0" class="empty">
-      Aucune recette publiée pour le moment. Soyez le premier !
+      No recipe has been published yet. Be the first !
     </div>
 
     <div class="recipe-grid">
