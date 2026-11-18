@@ -148,10 +148,10 @@ const deleteRecipe = async (id) => {
 
 <style scoped>
 .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-.btn-new { background: #ff6b6b; color: white; border: none; padding: 0.7rem 1.2rem; border-radius: 5px; font-weight: bold; cursor: pointer; }
+.btn-new { background: #21773b; color: white; border: none; padding: 0.7rem 1.2rem; border-radius: 5px; font-weight: bold; cursor: pointer; }
 .form-container { margin-bottom: 2rem; }
 .my-recipe-item { background: white; padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 .actions { display: flex; gap: 0.5rem; }
 .btn-edit { background: #4dabf7; color: white; border: none; padding: 0.5rem 0.8rem; border-radius: 4px; cursor: pointer; }
-.btn-delete { background: #fa5252; color: white; border: none; padding: 0.5rem 0.8rem; border-radius: 4px; cursor: pointer; }
+.btn-delete { background: #21773b; color: white; border: none; padding: 0.5rem 0.8rem; border-radius: 4px; cursor: pointer; }
 </style>
