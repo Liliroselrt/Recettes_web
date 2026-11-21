@@ -3,6 +3,8 @@ const Recipe = require('./Recipe');
 const Review = require('./Review');
 const Favorite = require('./Favorite');
 const RecipeLike = require('./RecipeLike');
+const UserFollow = require('./UserFollow');
+const CookedRecipe = require('./CookedRecipe');
 
 User.hasMany(Recipe, { foreignKey: 'userId', onDelete: 'CASCADE' });
 Recipe.belongsTo(User, { foreignKey: 'userId' });
@@ -20,4 +22,4 @@ Favorite.belongsTo(Recipe, { foreignKey: 'recipeId' });
 Recipe.hasOne(RecipeLike, { foreignKey: 'recipeId', onDelete: 'CASCADE' });
 RecipeLike.belongsTo(Recipe, { foreignKey: 'recipeId' });
 
-module.exports = { User, Recipe, Review, Favorite, RecipeLike };
+module.exports = { User, Recipe, Review, Favorite, RecipeLike, UserFollow, CookedRecipe };

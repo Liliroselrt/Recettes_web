@@ -200,13 +200,64 @@ export function usePantry() {
     })
   }
 
+  // Remove an ingredient from the pantry (undo of "Add" / "I have it")
+  const removeFromPantry = (ing) => {
+    const key = ingredientKey(ing.name)
+    if (pantry.value[key]) pantry.value[key].have = false
+    delete addQuantities.value[key]
+  }
+
+  // True when the ingredient was ticked in the pantry (basics assumed available have nothing to remove)
+  const canRemove = (ing) => {
+    const key = ingredientKey(ing.name)
+    return !isAssumedBasic(key) && isInPantry(key)
+  }
+
   const resetAddQuantities = () => { addQuantities.value = {} }
+
+  // ----- Cooking a recipe: take the used quantities out of the pantry -----
+  // What cooking `recipe` would take out of the pantry (nothing is changed here).
+  // Only ingredients with a known quantity are deducted: basics, "to taste" ingredients,
+  // "I have plenty" entries (empty quantity) and different units (cannot be compared) are left alone.
+  // -> [{ key, name, unit, before, after, runOut }]
+  const planConsumption = (recipe) => {
+    const remaining = new Map()   // an ingredient listed twice in a recipe is deducted twice
+    const changes = new Map()
+    recipe.ingredients.forEach(ing => {
+      const key = ingredientKey(ing.name)
+      if (isAssumedBasic(key)) return
+      const entry = pantry.value[key]
+      if (!entry || !entry.have) return
+      if (!ing.unit || ing.quantity === null || ing.quantity === '') return
+      if (entry.quantity === '' || entry.quantity === null || entry.quantity === undefined) return
+      if (unitByKey.value[key] !== ing.unit) return
+
+      const before = remaining.has(key) ? remaining.get(key) : Number(entry.quantity)
+      const after = Math.max(0, Math.round((before - Number(ing.quantity)) * 100) / 100)
+      remaining.set(key, after)
+      const previous = changes.get(key)
+      changes.set(key, { key, name: ing.name, unit: ing.unit, before: previous ? previous.before : before, after, runOut: after === 0 })
+    })
+    return [...changes.values()]
+  }
+
+  // Applies the plan. An ingredient that reaches 0 is taken out of the pantry (it is "used up").
+  const consumeRecipe = (recipe) => {
+    const changes = planConsumption(recipe)
+    changes.forEach(change => {
+      const entry = pantry.value[change.key]
+      if (change.runOut) { entry.have = false; entry.quantity = '' }
+      else entry.quantity = change.after
+    })
+    return changes
+  }
 
   return {
     pantry, onlyCookable, pantryCount, ingredientCatalog, unitByKey, pantryCatalog, basicItems,
     isAssumedBasic, isInPantry, togglePantry, clearPantry, toggleBasic,
     ingredientStatus, pantryMatch, pantryMatchText,
     statusLabel, statusIcon, rowClass, recipeMissingCount,
-    addQuantity, setAddQuantity, addToPantry, addAllMissing, resetAddQuantities
+    addQuantity, setAddQuantity, addToPantry, addAllMissing, removeFromPantry, canRemove, resetAddQuantities,
+    planConsumption, consumeRecipe
   }
 }

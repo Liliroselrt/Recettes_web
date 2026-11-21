@@ -21,7 +21,7 @@
           <h2 class="text-2xl sm:text-4xl font-extrabold mt-2">{{ recipe.title }}</h2>
           <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm text-slate-200 mt-2">
             <span><i class="fa-regular fa-clock mr-1 text-amber-400"></i> {{ recipe.prepTime }} minutes</span>
-            <span><i class="fa-solid fa-user mr-1 text-amber-400"></i> {{ recipe.author }}</span>
+            <RouterLink :to="`/users/${recipe.userId}`" class="pointer-events-auto hover:underline" :title="`See the profile of ${recipe.author}`" @click="emit('close')"><i class="fa-solid fa-user mr-1 text-amber-400"></i> {{ recipe.author }}</RouterLink>
             <span><i class="fa-solid fa-star mr-1 text-amber-400"></i> {{ ratingText(recipe) }}</span>
             <span><i class="fa-solid fa-heart mr-1 text-amber-400"></i> {{ totalFavorites(recipe) }}</span>
             <span><i class="fa-regular fa-calendar mr-1 text-amber-400"></i> {{ recipeTimeLabel(recipe, true) }}</span>
@@ -83,6 +83,11 @@
                   <i class="fa-solid fa-plus"></i> {{ ingredient.unit ? 'Add' : 'I have it' }}
                 </button>
               </div>
+
+              <!-- Take this ingredient out of the pantry again -->
+              <button v-if="canRemove(ingredient)" type="button" @click="removeFromPantry(ingredient)" class="btn btn-secondary btn-sm ing-remove" :aria-label="'Remove ' + ingredient.name + ' from my pantry'" :title="'Remove ' + ingredient.name + ' from my pantry'">
+                <i class="fa-solid fa-minus"></i> Remove
+              </button>
             </li>
           </ul>
         </div>
@@ -101,6 +106,64 @@
             </li>
           </ol>
         </div>
+
+        <!-- I cooked this: saves the recipe in my history and takes the used quantities out of my pantry -->
+        <section class="rounded-2xl border border-orange-100 bg-amber-50/60 p-5" aria-label="Cooked this recipe">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h4 class="text-lg font-bold text-slate-900 flex items-center">
+                <i class="fa-solid fa-utensils text-brand-500 mr-2"></i> Did you cook it?
+              </h4>
+              <p class="text-xs text-slate-500 mt-1">Keep it in your cooking history and update your pantry.</p>
+            </div>
+            <button v-if="!cookOpen" type="button" class="btn btn-primary btn-lg" @click="openCook">
+              <i class="fa-solid fa-check"></i> I cooked this
+            </button>
+          </div>
+
+          <p v-if="cookResult && !cookOpen" class="notice notice-ok mt-4" role="status">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>
+              <template v-if="cookResult.saved">Saved in your cooking history.</template>
+              <template v-else>Done.</template>
+              <template v-if="cookResult.changes.length"> {{ cookResult.changes.length }} ingredient{{ cookResult.changes.length === 1 ? '' : 's' }} taken out of your pantry.</template>
+              <RouterLink v-if="cookResult.saved" to="/history" class="font-bold underline ml-1" @click="emit('close')">See my history</RouterLink>
+            </span>
+          </p>
+
+          <form v-if="cookOpen" @submit.prevent="confirmCooked" class="mt-4 space-y-4">
+            <div v-if="cookPlan.length">
+              <label class="flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer">
+                <input type="checkbox" v-model="cookDeduct" class="w-4 h-4 rounded border-slate-300">
+                Take these ingredients out of my pantry
+              </label>
+              <ul v-if="cookDeduct" class="mt-3 space-y-1.5 text-sm text-slate-700">
+                <li v-for="change in cookPlan" :key="change.key" class="flex flex-wrap items-center gap-x-2">
+                  <span class="first-letter:uppercase font-semibold">{{ change.name }}</span>
+                  <span class="text-slate-500">{{ change.before }} {{ change.unit }} <i class="fa-solid fa-arrow-right text-xs mx-1"></i> {{ change.after }} {{ change.unit }}</span>
+                  <span v-if="change.runOut" class="tag tag-warn">Used up</span>
+                </li>
+              </ul>
+            </div>
+            <p v-else class="text-xs text-slate-500">
+              Nothing to take out of your pantry: only ingredients you ticked with a quantity are deducted (basics and "to taste" ingredients never are).
+            </p>
+
+            <div v-if="isLoggedIn">
+              <label class="field-label" for="cook-note">Note <span class="font-normal text-slate-400">(optional)</span></label>
+              <textarea id="cook-note" v-model="cookNote" rows="2" maxlength="300" class="field" placeholder="E.g. Used less sugar, great with vanilla ice cream..."></textarea>
+            </div>
+            <p v-else class="text-xs text-slate-500"><i class="fa-solid fa-lock mr-1"></i>Log in to also keep this recipe in your cooking history.</p>
+
+            <p v-if="cookError" role="alert" class="text-xs font-semibold text-rose-600">{{ cookError }}</p>
+            <div class="flex flex-wrap gap-2">
+              <button type="submit" class="btn btn-primary btn-lg" :disabled="cooking">
+                <i :class="cooking ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-check'"></i> Confirm
+              </button>
+              <button type="button" class="btn btn-secondary btn-lg" @click="cookOpen = false">Cancel</button>
+            </div>
+          </form>
+        </section>
 
         <!-- Video: played in a frame inside the recipe. Always available to the author (My Creations);
              other people need Gourmet Plus. The server only sends the link when the person may watch it. -->
@@ -140,7 +203,7 @@
           </template>
 
           <!-- Locked: teaser frame (blurred cover picture). The payment window opens right here and the video appears once paid. -->
-          <div v-else class="relative aspect-video min-h-[15rem] w-full overflow-hidden rounded-2xl bg-slate-900 shadow-sm">
+          <div v-else class="relative aspect-video min-h-[15rem] w-full overflow-hidden rounded-2xl bg-slate-900 shadow-sm cursor-pointer" role="link" tabindex="0" aria-label="See the Gourmet Plus subscription plans" @click="goToPlans" @keydown.enter.self="goToPlans">
             <img :src="currentImage(recipe)" alt="" aria-hidden="true" class="absolute inset-0 w-full h-full object-cover blur-md scale-110 opacity-60">
             <div class="absolute inset-0 bg-slate-900/55"></div>
             <div class="relative h-full flex flex-col items-center justify-center gap-2.5 text-center p-4 sm:p-6">
@@ -150,12 +213,12 @@
               <p class="text-white font-bold text-base sm:text-lg">
                 <i class="fa-solid fa-lock text-amber-400 mr-1.5"></i>Watch this recipe being made
               </p>
-              <p class="text-slate-200 text-xs sm:text-sm">Unlock the video of every recipe with Gourmet Plus for {{ PLAN.priceLabel }} a month. Cancel anytime.</p>
+              <p class="text-slate-200 text-xs sm:text-sm">Unlock the video of every recipe with Gourmet Plus for {{ PLAN.priceLabel }} a month. Cancel anytime. <span class="underline">Click to see the plans.</span></p>
               <div class="flex flex-wrap items-center justify-center gap-2 mt-1">
-                <button type="button" class="btn btn-primary btn-sm" @click="unlock">
+                <button type="button" class="btn btn-primary btn-sm" @click.stop="unlock">
                   <i class="fa-solid fa-star"></i> Unlock the video · {{ PLAN.priceLabel }}/month
                 </button>
-                <button type="button" class="btn btn-secondary btn-sm" @click="goToPlans">See what is included</button>
+                <button type="button" class="btn btn-secondary btn-sm" @click.stop="goToPlans">See what is included</button>
               </div>
             </div>
           </div>
@@ -167,39 +230,67 @@
             <i class="fa-solid fa-comments text-brand-500 mr-2"></i> Community reviews ({{ recipe.reviews.length }})
           </h4>
 
-          <!-- Add Review Form -->
-          <form @submit.prevent="submitReview" class="bg-amber-50/60 border border-amber-100 p-4 rounded-2xl mb-6">
-            <label class="field-label">Leave your rating:</label>
+          <!-- Summary -->
+          <div v-if="recipe.reviews.length" class="review-summary">
+            <span class="review-summary-score">{{ averageRating(recipe).toFixed(1) }}</span>
+            <span>
+              <span class="block text-amber-400 text-lg leading-none" aria-hidden="true">
+                <i v-for="s in 5" :key="s" :class="s <= Math.round(averageRating(recipe)) ? 'fa-solid fa-star' : 'fa-regular fa-star text-slate-300'"></i>
+              </span>
+              <span class="block text-xs text-slate-500 mt-1">{{ recipe.reviews.length }} review{{ recipe.reviews.length === 1 ? '' : 's' }}</span>
+            </span>
+          </div>
+
+          <!-- One review per person: write it, then edit it -->
+          <p v-if="isRestricted" class="notice notice-warn" role="status">
+            <i class="fa-solid fa-ban"></i>
+            <span>Your account is suspended: you can no longer post reviews or share recipes.<span v-if="restrictionReason"> Reason: {{ restrictionReason }}</span></span>
+          </p>
+          <form v-else @submit.prevent="submitReview" class="review-form">
+            <label class="field-label">{{ myOwnReview ? 'Your review (you can edit it):' : 'Leave your rating:' }}</label>
             <div class="flex items-center space-x-1 mb-3">
               <button type="button" v-for="star in 5" :key="star" @click="newReviewRating = star" class="star-btn" :aria-label="star + ' star' + (star > 1 ? 's' : '')">
                 <i :class="star <= newReviewRating ? 'fa-solid fa-star text-amber-400' : 'fa-regular fa-star text-slate-300'"></i>
               </button>
             </div>
-            <textarea v-model="newReviewComment" rows="2" placeholder="E.g. Delicious! I added a pinch of cinnamon..." aria-label="Your review" class="field mb-3"></textarea>
+            <textarea v-model="newReviewComment" rows="3" placeholder="E.g. Delicious! I added a pinch of cinnamon..." aria-label="Your review" class="field mb-3"></textarea>
             <p v-if="!isLoggedIn" class="text-xs text-slate-500 mb-2">
               <i class="fa-solid fa-lock mr-1"></i>You need to be logged in to post a review.
             </p>
             <p v-if="reviewError" role="alert" class="text-xs font-semibold text-rose-600 mb-2">{{ reviewError }}</p>
+            <p v-if="reviewSaved" role="status" class="text-xs font-semibold text-emerald-700 mb-2"><i class="fa-solid fa-circle-check mr-1"></i>Your review was saved.</p>
             <button type="submit" class="btn btn-primary btn-sm" :disabled="posting">
-              <i :class="posting ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-paper-plane'"></i> Post my review
+              <i :class="posting ? 'fa-solid fa-spinner fa-spin' : (myOwnReview ? 'fa-solid fa-pen' : 'fa-solid fa-paper-plane')"></i>
+              {{ myOwnReview ? 'Update my review' : 'Post my review' }}
             </button>
           </form>
 
-          <!-- Existing Reviews -->
-          <div class="space-y-3">
-            <div v-for="rev in recipe.reviews" :key="rev.id" class="p-3 bg-white border border-orange-100 rounded-xl">
-              <div class="flex justify-between items-center text-xs mb-1">
-                <span class="font-bold text-slate-800">{{ rev.author }}</span>
-                <span class="flex items-center gap-3">
-                  <span class="text-amber-500 font-bold"><i class="fa-solid fa-star mr-1"></i> {{ rev.rating }}/5</span>
+          <!-- Existing Reviews (mine first) -->
+          <ul class="space-y-3 mt-6">
+            <li v-for="rev in sortedReviews" :key="rev.id" class="review-card" :class="{ 'review-card-mine': rev.userId === userId }">
+              <RouterLink :to="`/users/${rev.userId}`" class="flex-none" :aria-label="'Profile of ' + rev.author" @click="emit('close')">
+                <UserAvatar :name="rev.author" :src="rev.authorAvatar" size="md" class="border-2 border-brand-500" />
+              </RouterLink>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                  <span class="font-bold text-slate-900 text-sm">
+                    <RouterLink :to="`/users/${rev.userId}`" class="hover:text-brand-600 hover:underline" @click="emit('close')">{{ rev.author }}</RouterLink>
+                    <span v-if="rev.userId === userId" class="tag ml-1">You</span>
+                  </span>
                   <button v-if="rev.userId !== userId" type="button" class="text-slate-400 hover:text-rose-600" :title="'Report this review by ' + rev.author" :aria-label="'Report this review by ' + rev.author" @click="openReviewReport(rev)">
                     <i class="fa-regular fa-flag"></i>
                   </button>
-                </span>
+                </div>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-amber-400 text-sm" :aria-label="rev.rating + ' out of 5'">
+                    <i v-for="s in 5" :key="s" :class="s <= rev.rating ? 'fa-solid fa-star' : 'fa-regular fa-star text-slate-300'"></i>
+                  </span>
+                  <span class="text-xs font-bold text-amber-600">{{ rev.rating }}/5</span>
+                </div>
+                <p class="text-sm text-slate-700 leading-relaxed mt-2 break-words">{{ rev.comment }}</p>
               </div>
-              <p class="text-xs text-slate-600">{{ rev.comment }}</p>
-            </div>
-          </div>
+            </li>
+          </ul>
         </div>
       </div>
 
@@ -227,13 +318,16 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import RecipeCarousel from './RecipeCarousel.vue'
+import UserAvatar from './UserAvatar.vue'
 import FakePaymentModal from './FakePaymentModal.vue'
 import ReportModal from './ReportModal.vue'
 import { useImages } from '../composables/useImages'
 import { useRecipes } from '../composables/useRecipes'
 import { usePantry } from '../composables/usePantry'
+import { useCooking } from '../composables/useCooking'
 import { useUI } from '../composables/useUI'
 import { useAuth } from '../composables/useAuth'
+import { useRoles } from '../composables/useRoles'
 import { formatIngredient, instructionSteps, recipeTimeLabel } from '../utils/recipes'
 import { exportRecipePdf } from '../utils/exportPdf'
 import { useRouter } from 'vue-router'
@@ -248,15 +342,17 @@ const props = defineProps({
 })
 const emit = defineEmits(['close', 'navigate'])
 
-const { ratingText, totalFavorites, addReview, isOwner } = useRecipes()
+const { ratingText, totalFavorites, addReview, isOwner, myReview, averageRating } = useRecipes()
 const router = useRouter()
 const {
   pantryCount, pantryMatch, ingredientStatus, rowClass, statusIcon, statusLabel,
-  recipeMissingCount, addAllMissing, addToPantry, addQuantity, setAddQuantity, resetAddQuantities
+  recipeMissingCount, addAllMissing, addToPantry, removeFromPantry, canRemove, addQuantity, setAddQuantity, resetAddQuantities, planConsumption
 } = usePantry()
+const { markCooked } = useCooking()
 const { showFormModal, showAuthModal, openAuth } = useUI()
 const { isLoggedIn, userId } = useAuth()
 const { currentImage } = useImages()
+const { isRestricted, restrictionReason } = useRoles()
 
 const modalEl = ref(null)
 const isMine = computed(() => isOwner(props.recipe))
@@ -327,21 +423,63 @@ async function exportPdf() {
   }
 }
 
+// ----- I cooked this -----
+const cookOpen = ref(false)
+const cookDeduct = ref(true)
+const cookNote = ref('')
+const cooking = ref(false)
+const cookError = ref('')
+const cookResult = ref(null)   // { saved, changes } after a successful confirmation
+const cookPlan = computed(() => planConsumption(props.recipe))
+
+function openCook() {
+  cookResult.value = null
+  cookError.value = ''
+  cookDeduct.value = true
+  cookOpen.value = true
+}
+async function confirmCooked() {
+  cooking.value = true
+  cookError.value = ''
+  try {
+    cookResult.value = await markCooked(props.recipe, { note: cookNote.value, deductPantry: cookDeduct.value })
+    cookOpen.value = false
+    cookNote.value = ''
+  } catch (e) {
+    cookError.value = e.message
+  } finally {
+    cooking.value = false
+  }
+}
+
 // ----- Reviews -----
 const newReviewRating = ref(5)
 const newReviewComment = ref('')
 const reviewError = ref('')
 const posting = ref(false)
+const reviewSaved = ref(false)
+
+// My existing review of this recipe (if any): the form edits it instead of adding another one
+const myOwnReview = computed(() => myReview(props.recipe))
+const sortedReviews = computed(() =>
+  [...props.recipe.reviews].sort((a, b) => (b.userId === userId.value) - (a.userId === userId.value)))
+function fillReviewForm() {
+  newReviewRating.value = myOwnReview.value ? myOwnReview.value.rating : 5
+  newReviewComment.value = myOwnReview.value ? myOwnReview.value.comment : ''
+}
+// Also refills the form after logging in / out
+watch(() => [props.recipe.id, userId.value], fillReviewForm)
 
 async function submitReview() {
   // Reviews need an account: otherwise the log in window opens
   if (!isLoggedIn.value) return openAuth()
   if (!newReviewComment.value.trim()) return
   reviewError.value = ''
+  reviewSaved.value = false
   posting.value = true
   try {
     await addReview(props.recipe, newReviewRating.value, newReviewComment.value.trim())
-    newReviewComment.value = ''
+    reviewSaved.value = true
   } catch (e) {
     reviewError.value = e.message
   } finally {
@@ -349,12 +487,16 @@ async function submitReview() {
   }
 }
 
-// A new recipe starts at the top of the window with a blank review form
+// A new recipe starts at the top of the window with my review (or a blank form)
 watch(() => props.recipe.id, () => {
   resetAddQuantities()
-  newReviewRating.value = 5
-  newReviewComment.value = ''
+  fillReviewForm()
+  cookOpen.value = false
+  cookResult.value = null
+  cookError.value = ''
+  cookNote.value = ''
   reviewError.value = ''
+  reviewSaved.value = false
   exportError.value = ''
   justUnlocked.value = false
   showPayment.value = false

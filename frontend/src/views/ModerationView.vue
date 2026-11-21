@@ -140,7 +140,7 @@ const DECISION_OPTIONS = {
   hide_recipe: { label: 'Hide the recipe', help: 'Removed from the community. Only its author still sees it and cannot share it again.' },
   delete_recipe: { label: 'Delete the recipe', help: 'Permanent. Its reviews and favourites are deleted too.' },
   delete_review: { label: 'Delete the review', help: 'Permanent.' },
-  ban_user: { label: 'Suspend the account', help: 'The person can no longer log in. Admins only.', adminOnly: true }
+  ban_user: { label: 'Suspend the account', help: 'The person can still log in but can no longer post reviews or share recipes. Admins only.', adminOnly: true }
 }
 const OPTIONS_BY_TYPE = {
   recipe: ['dismiss', 'warn', 'hide_recipe', 'delete_recipe', 'ban_user'],

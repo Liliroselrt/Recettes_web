@@ -1,9 +1,10 @@
 const { Op, fn } = require('sequelize');
-const { User, Recipe, Review, Favorite, RecipeLike } = require('../models');
+const { User, Recipe, Review, Favorite, RecipeLike, CookedRecipe } = require('../models');
 const sequelize = require('../config/database');
 const { getViewerAccess, canWatchVideo } = require('../subscription/access');
 
-const CATEGORIES = ['Starter', 'Main', 'Dessert', 'Quick'];
+// « Quick » n'est plus une catégorie : c'est un filtre du site (temps de préparation < 20 min)
+const CATEGORIES = ['Starter', 'Main', 'Dessert'];
 const UNITS = ['g', 'ml', 'pcs', 'tbsp', 'tsp', ''];   // '' = "to taste"
 const MAX_IMAGES = 6;
 
@@ -64,8 +65,8 @@ function cleanRecipeInput(body) {
 // Mise en forme de la réponse (même structure que SEED_RECIPES de la maquette)
 // ---------------------------------------------------------------------------
 const recipeInclude = [
-  { model: User, attributes: ['id', 'username'] },
-  { model: Review, attributes: ['id', 'userId', 'rating', 'comment', 'createdAt'], include: [{ model: User, attributes: ['username'] }] },
+  { model: User, attributes: ['id', 'username', 'avatarUrl'] },
+  { model: Review, attributes: ['id', 'userId', 'rating', 'comment', 'createdAt'], include: [{ model: User, attributes: ['username', 'avatarUrl'] }] },
   { model: RecipeLike, attributes: ['likes'], required: false }
 ];
 const recipeOrder = [['createdAt', 'DESC'], [Review, 'createdAt', 'ASC'], [Review, 'id', 'ASC']];
@@ -121,10 +122,11 @@ function formatRecipe(recipe, { countByRecipe, mine, access }) {
     likes: recipe.RecipeLike ? recipe.RecipeLike.likes : 0,
     userId: recipe.userId,
     author: recipe.User ? recipe.User.username : 'Unknown chef',
+    authorAvatar: recipe.User ? recipe.User.avatarUrl : null,
     favoritesCount: countByRecipe[recipe.id] || 0,
     isFavorite: mine.has(recipe.id),
     reviews: (recipe.Reviews || []).map(r => ({
-      id: r.id, userId: r.userId, author: r.User ? r.User.username : 'Deleted user', rating: r.rating, comment: r.comment, createdAt: r.createdAt
+      id: r.id, userId: r.userId, author: r.User ? r.User.username : 'Deleted user', authorAvatar: r.User ? r.User.avatarUrl : null, rating: r.rating, comment: r.comment, createdAt: r.createdAt
     }))
   };
 }
@@ -214,6 +216,9 @@ exports.shareRecipe = async (req, res) => {
     }
 
     const shared = typeof req.body.shared === 'boolean' ? req.body.shared : !recipe.shared;
+    if (shared && req.user.isBanned) {
+      return res.status(403).json({ error: `Your account is suspended: you can no longer share recipes.${req.user.bannedReason ? ' Reason: ' + req.user.bannedReason : ''}` });
+    }
     if (shared && recipe.isHidden) {
       return res.status(403).json({ error: 'This recipe was hidden by the moderators and cannot be shared.' });
     }
@@ -245,6 +250,9 @@ exports.deleteRecipe = async (req, res) => {
 // Avis : un compte est nécessaire (Reviews.userId est obligatoire dans le schéma)
 exports.addReview = async (req, res) => {
   try {
+    if (req.user.isBanned) {
+      return res.status(403).json({ error: `Your account is suspended: you can no longer post reviews.${req.user.bannedReason ? ' Reason: ' + req.user.bannedReason : ''}` });
+    }
     const recipe = await loadVisibleRecipe(req.params.id, req.user);
     if (!recipe) return res.status(404).json({ error: 'Recipe not found.' });
 
@@ -257,13 +265,20 @@ exports.addReview = async (req, res) => {
       return res.status(400).json({ error: 'Please write a comment (2000 characters maximum).' });
     }
 
-    const review = await Review.create({
-      rating,
-      comment,
-      userId: req.user.id,
-      recipeId: recipe.id
-    });
-    res.status(201).json({
+    // Une seule review par personne et par recette : si elle existe déjà, on la modifie
+    let review = await Review.findOne({ where: { userId: req.user.id, recipeId: recipe.id } });
+    const isUpdate = !!review;
+    if (review) {
+      await review.update({ rating, comment });
+    } else {
+      review = await Review.create({
+        rating,
+        comment,
+        userId: req.user.id,
+        recipeId: recipe.id
+      });
+    }
+    res.status(isUpdate ? 200 : 201).json({
       review: { id: review.id, userId: req.user.id, author: req.user.username, rating, comment, createdAt: review.createdAt }
     });
   } catch (error) {
@@ -286,5 +301,32 @@ exports.toggleFavorite = async (req, res) => {
     res.status(200).json({ isFavorite: !existing, favoritesCount });
   } catch (error) {
     serverError(res, 'Could not update the favorites.', error);
+  }
+};
+
+// « J'ai cuisiné cette recette » : ajoute une ligne à l'historique de la personne connectée.
+// (La déduction des ingrédients du garde-manger est faite côté navigateur : le garde-manger est en localStorage.)
+exports.markCooked = async (req, res) => {
+  try {
+    const recipe = await loadVisibleRecipe(req.params.id, req.user);
+    if (!recipe) return res.status(404).json({ error: 'Recipe not found.' });
+
+    const note = typeof req.body.note === 'string' ? req.body.note.trim() : '';
+    if (note.length > 300) return res.status(400).json({ error: 'Please keep your note under 300 characters.' });
+
+    const entry = await CookedRecipe.create({
+      userId: req.user.id,
+      recipeId: recipe.id,
+      recipeTitle: recipe.title,
+      recipeImage: recipe.images[0] || null,
+      note: note || null,
+      cookedAt: new Date()
+    });
+    res.status(201).json({
+      message: 'Added to your cooking history!',
+      entry: { id: entry.id, recipeId: entry.recipeId, title: entry.recipeTitle, image: entry.recipeImage, note: entry.note, cookedAt: entry.cookedAt }
+    });
+  } catch (error) {
+    serverError(res, 'Could not save this recipe in your history.', error);
   }
 };

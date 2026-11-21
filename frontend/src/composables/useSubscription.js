@@ -2,6 +2,7 @@ import { ref, computed, watch } from 'vue'
 import { apiFetch } from '../utils/api'
 import { useAuth } from './useAuth'
 import { useRecipes } from './useRecipes'
+import { useRoles } from './useRoles'
 
 // Plan payant unique (le prix réel vient du serveur ; ceci sert à l'affichage)
 export const PLAN = { name: 'Gourmet Plus', price: 30, currency: 'ZAR', priceLabel: 'R30' }
@@ -32,7 +33,10 @@ watch(token, refresh, { immediate: true })
 
 export function useSubscription() {
   const { fetchRecipes } = useRecipes()
-  const isSubscriber = computed(() => !!subscription.value?.isSubscriber)
+  const { isModerator } = useRoles()
+  // Moderators and admins have Gourmet Plus included (an admin "viewing as a regular user" does not)
+  const hasStaffAccess = computed(() => isModerator.value)
+  const isSubscriber = computed(() => hasStaffAccess.value || !!subscription.value?.isSubscriber)
   const willRenew = computed(() => !!subscription.value?.willRenew)
   const simulated = computed(() => !!subscription.value?.simulated) // admin qui « voit comme » un abonné
   const endDate = computed(() => subscription.value?.endDate || null)
@@ -48,5 +52,5 @@ export function useSubscription() {
     await refresh()
   }
 
-  return { subscription, loading, isSubscriber, willRenew, simulated, endDate, refresh, subscribe, cancel }
+  return { subscription, loading, isSubscriber, hasStaffAccess, willRenew, simulated, endDate, refresh, subscribe, cancel }
 }

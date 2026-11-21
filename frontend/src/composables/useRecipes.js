@@ -67,8 +67,15 @@ export function useRecipes() {
       method: 'POST',
       body: { rating, comment }
     })
-    recipe.reviews.push(review)
+    // One review per person and recipe: the server creates it or updates the existing one
+    const index = recipe.reviews.findIndex(r => r.id === review.id || r.userId === review.userId)
+    if (index === -1) recipe.reviews.push(review)
+    else recipe.reviews[index] = review
   }
+
+  // The review written by the logged in person for this recipe (or null)
+  const myReview = (recipe) =>
+    (isLoggedIn.value && recipe.reviews.find(r => r.userId === userId.value)) || null
 
   // ----- Recipe CRUD -----
   async function saveRecipe(fields, editingId = null) {
@@ -97,7 +104,7 @@ export function useRecipes() {
   return {
     recipes, loading, error, fetchRecipes,
     isOwner, isFavorite, favoriteCount, totalFavorites, toggleFavorite,
-    averageRating, ratingLabel, ratingText, latestReview, addReview,
+    averageRating, ratingLabel, ratingText, latestReview, addReview, myReview,
     saveRecipe, toggleShare, deleteRecipe
   }
 }

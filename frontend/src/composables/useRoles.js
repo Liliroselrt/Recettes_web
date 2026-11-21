@@ -13,7 +13,7 @@ export const VIEW_MODES = [
   { value: 'user', label: 'Regular user', help: 'No subscription, no staff tools' }
 ]
 
-// Profil de la personne connectée : { id, username, role, canReport }
+// Profil de la personne connectée : { id, username, role, canReport, isBanned, bannedReason }
 const profile = ref(null)
 const { token } = useAuth()
 
@@ -44,6 +44,9 @@ export function useRoles() {
   })
   const isAdmin = computed(() => role.value === 'admin')
   const isModerator = computed(() => role.value === 'moderator' || role.value === 'admin')
+  // Compte suspendu : peut se connecter et lire, mais ne peut plus commenter ni partager de recette
+  const isRestricted = computed(() => !!(profile.value && profile.value.isBanned))
+  const restrictionReason = computed(() => (profile.value && profile.value.bannedReason) || '')
 
   async function setViewMode(mode) {
     setViewAs(mode)
@@ -52,5 +55,5 @@ export function useRoles() {
     await Promise.all([fetchRecipes(), refresh()])
   }
 
-  return { profile, realRole, role, isRealAdmin, isAdmin, isModerator, viewMode, setViewMode }
+  return { profile, realRole, role, isRealAdmin, isAdmin, isModerator, isRestricted, restrictionReason, viewMode, setViewMode }
 }

@@ -285,6 +285,10 @@ function createAdminRouter({ sequelize, requireRole }) {
       const params = { id, now: new Date() }
       const entries = []
 
+      if (user.role === 'admin' && (body.role !== undefined || body.subscriber !== undefined)) {
+        return res.status(400).json({ error: "The role of an admin cannot be changed." })
+      }
+
       if (body.role !== undefined) {
         if (!ROLES.includes(body.role)) return res.status(400).json({ error: 'Invalid role.' })
         if (body.role !== user.role) {
@@ -310,10 +314,36 @@ function createAdminRouter({ sequelize, requireRole }) {
         params.canReport = body.canReport; params.blockedReason = body.canReport ? null : reason
         entries.push([body.canReport ? 'report_access_restored' : 'report_access_removed', body.canReport ? null : reason])
       }
-      if (!sets.length) return res.status(400).json({ error: 'Nothing to change.' })
+      // Abonné : offrir Gourmet Plus un mois (sans paiement) ou retirer l'abonnement en cours
+      let subscriptionChange = null
+      if (body.subscriber !== undefined) {
+        if (typeof body.subscriber !== 'boolean') return res.status(400).json({ error: 'Invalid request.' })
+        const [active] = await select(
+          "SELECT id FROM UserSubscriptions WHERE userId = :id AND status IN ('active', 'canceled', 'past_due') AND endDate > :now LIMIT 1", { id, now: params.now })
+        if (body.subscriber && !active) {
+          const [plan] = await select("SELECT id FROM SubscriptionPlans WHERE slug = 'gourmet-plus' AND isActive = TRUE LIMIT 1", {})
+          if (!plan) return res.status(404).json({ error: 'The subscription plan is not available.' })
+          const endDate = new Date(params.now); endDate.setMonth(endDate.getMonth() + 1)
+          subscriptionChange = { type: 'grant', planId: plan.id, endDate }
+          entries.push(['subscription_granted', 'Gourmet Plus offered for one month'])
+        } else if (!body.subscriber && active) {
+          subscriptionChange = { type: 'revoke' }
+          entries.push(['subscription_revoked', 'Subscription ended by an admin'])
+        }
+      }
+      if (!sets.length && !subscriptionChange) return res.status(400).json({ error: 'Nothing to change.' })
 
       await sequelize.transaction(async (t) => {
-        await run(`UPDATE Users SET ${sets.join(', ')}, updatedAt = :now WHERE id = :id`, params, t)
+        if (sets.length) await run(`UPDATE Users SET ${sets.join(', ')}, updatedAt = :now WHERE id = :id`, params, t)
+        if (subscriptionChange && subscriptionChange.type === 'grant') {
+          await run(`INSERT INTO UserSubscriptions (userId, planId, status, startDate, endDate, createdAt, updatedAt)
+                     VALUES (:id, :planId, 'canceled', :now, :endDate, :now, :now)`,
+            { id, planId: subscriptionChange.planId, now: params.now, endDate: subscriptionChange.endDate }, t)
+        }
+        if (subscriptionChange && subscriptionChange.type === 'revoke') {
+          await run("UPDATE UserSubscriptions SET status = 'expired', endDate = :now, updatedAt = :now WHERE userId = :id AND status IN ('active', 'canceled', 'past_due') AND endDate > :now",
+            { id, now: params.now }, t)
+        }
         for (const [action, details] of entries) await log(req.user.id, action, 'user', id, details, t)
       })
       res.json({ ok: true })

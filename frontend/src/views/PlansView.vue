@@ -44,11 +44,12 @@
           <template v-if="isSubscriber">
             <p class="notice notice-ok" role="status">
               <i class="fa-solid fa-circle-check"></i>
-              <span v-if="simulated">Simulated subscription (you are viewing the site as a subscriber).</span>
+              <span v-if="hasStaffAccess">Gourmet Plus is included with your {{ role }} account. No subscription needed.</span>
+              <span v-else-if="simulated">Simulated subscription (you are viewing the site as a subscriber).</span>
               <span v-else-if="willRenew">You are a member until {{ endLabel }}.</span>
               <span v-else>Cancelled. You keep access until {{ endLabel }}.</span>
             </p>
-            <button v-if="willRenew && !simulated" type="button" class="btn btn-danger btn-sm mt-3" :disabled="busy" @click="stopSubscription">
+            <button v-if="willRenew && !simulated && !hasStaffAccess" type="button" class="btn btn-danger btn-sm mt-3" :disabled="busy" @click="stopSubscription">
               <i :class="busy ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-ban'"></i> Cancel subscription
             </button>
           </template>
@@ -76,10 +77,12 @@ import FakePaymentModal from '../components/FakePaymentModal.vue'
 import { useAuth } from '../composables/useAuth'
 import { useUI } from '../composables/useUI'
 import { useSubscription, PLAN } from '../composables/useSubscription'
+import { useRoles } from '../composables/useRoles'
 
 const { isLoggedIn } = useAuth()
 const { openAuth } = useUI()
-const { isSubscriber, willRenew, simulated, endDate, cancel } = useSubscription()
+const { isSubscriber, hasStaffAccess, willRenew, simulated, endDate, cancel } = useSubscription()
+const { role } = useRoles()
 
 const freeFeatures = [
   'Browse and cook every community recipe',

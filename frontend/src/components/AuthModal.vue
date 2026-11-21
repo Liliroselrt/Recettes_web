@@ -11,6 +11,7 @@
       </p>
 
       <form @submit.prevent="submit" class="space-y-4">
+        <p v-if="authNotice" class="notice notice-warn" role="status"><i class="fa-solid fa-lock"></i><span>{{ authNotice }}</span></p>
         <p v-if="errorMessage" class="alert-error" role="alert">{{ errorMessage }}</p>
 
         <div>
@@ -49,9 +50,9 @@ import { useAuth } from '../composables/useAuth'
 import { useUI } from '../composables/useUI'
 
 const { setSession } = useAuth()
-const { closeAuth } = useUI()
+const { closeAuth, authNotice, authStartsAsSignup } = useUI()
 
-const signup = ref(false)
+const signup = ref(!!authNotice.value || authStartsAsSignup.value)
 const identifier = ref('')     // pseudo (ou email pour se connecter)
 const email = ref('')
 const password = ref('')

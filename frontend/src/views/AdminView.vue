@@ -123,9 +123,9 @@
                   <p class="text-xs text-slate-400">Joined {{ formatDate(u.createdAt) }}</p>
                 </td>
                 <td class="p-3">
-                  <span v-if="u.id === myId" class="tag">{{ u.role }}</span>
-                  <select v-else class="field field-sm field-auto" :value="u.role" :disabled="busyId === u.id" :aria-label="'Role of ' + u.username" @change="changeRole(u, $event)">
-                    <option value="user">User</option><option value="moderator">Moderator</option><option value="admin">Admin</option>
+                  <span v-if="u.id === myId || u.role === 'admin'" class="tag">{{ u.role }}</span>
+                  <select v-else class="field field-sm field-auto" :value="roleChoice(u)" :disabled="busyId === u.id" :aria-label="'Role of ' + u.username" @change="changeRole(u, $event)">
+                    <option value="user">User</option><option value="subscriber">Subscriber (Gourmet Plus)</option><option value="moderator">Moderator</option><option value="admin">Admin</option>
                   </select>
                 </td>
                 <td class="p-3 text-xs text-slate-600 space-y-0.5">
@@ -197,7 +197,8 @@ const LOG_LABELS = {
   role_changed: 'Role changed', user_banned: 'Account suspended', user_unbanned: 'Account reinstated',
   report_access_removed: 'Reporting ability removed', report_access_restored: 'Reporting ability restored',
   report_none: 'Report dismissed', report_warning: 'Warning sent', report_recipe_hidden: 'Recipe hidden',
-  report_recipe_deleted: 'Recipe deleted', report_review_deleted: 'Review deleted', report_user_banned: 'Account suspended (report)'
+  subscription_granted: 'Gourmet Plus granted', subscription_revoked: 'Gourmet Plus removed',
+  ticket_status: 'Support request updated', report_recipe_deleted: 'Recipe deleted', report_review_deleted: 'Review deleted', report_user_banned: 'Account suspended (report)'
 }
 
 const tab = ref('overview')
@@ -245,17 +246,26 @@ async function patchUser(user, body) {
   busyId.value = null
 }
 
+// Valeur affichée dans la liste : un utilisateur avec un abonnement en cours est « subscriber »
+const roleChoice = (u) => (u.role === 'user' && u.isSubscriber ? 'subscriber' : u.role)
+
 async function changeRole(user, event) {
-  const role = event.target.value
-  const message = role === 'admin'
-    ? `Make ${user.username} an admin? Admins can change roles, suspend accounts and see all the statistics.`
-    : `Change the role of ${user.username} to ${role}?`
-  if (!window.confirm(message)) { event.target.value = user.role; return }
-  await patchUser(user, { role })
+  const choice = event.target.value
+  const messages = {
+    admin: `Make ${user.username} an admin? An admin's role can no longer be changed afterwards.`,
+    moderator: `Make ${user.username} a moderator?`,
+    subscriber: `Give ${user.username} Gourmet Plus for one month (free, no payment)?`,
+    user: `Make ${user.username} a regular user? Any active subscription will be cancelled.`
+  }
+  if (!window.confirm(messages[choice])) { event.target.value = roleChoice(user); return }
+  const body = choice === 'subscriber' ? { role: 'user', subscriber: true }
+    : choice === 'user' ? { role: 'user', subscriber: false }
+    : { role: choice }
+  await patchUser(user, body)
 }
 
 async function suspend(user) {
-  const reason = window.prompt(`Why is ${user.username} suspended? The person will read this message.`)
+  const reason = window.prompt(`Why is ${user.username} suspended? The person can still log in but can no longer post reviews or share recipes. They will read this message.`)
   if (reason && reason.trim().length >= 3) await patchUser(user, { isBanned: true, bannedReason: reason.trim() })
 }
 async function reinstate(user) {

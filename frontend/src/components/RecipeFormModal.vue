@@ -27,7 +27,6 @@
               <option value="Starter">Starter</option>
               <option value="Main">Main Course</option>
               <option value="Dessert">Dessert</option>
-              <option value="Quick">Quick (&lt; 20 min)</option>
             </select>
           </div>
           <div>
@@ -43,7 +42,7 @@
             <p>
               <strong>Tip:</strong> find a free photo on
               <a href="https://unsplash.com" target="_blank" rel="noopener" class="font-bold text-brand-700 underline hover:text-brand-800">unsplash.com <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></a>,
-              right-click it, choose <em>“Copy image address”</em> and paste the link below. You can also import a picture from your computer: it is saved in the <code>img</code> folder of the backend.
+              right-click it, choose <em>“Copy image address”</em> and paste the link below.
             </p>
           </div>
 
@@ -51,11 +50,7 @@
             <input v-model="imageLinkInput" @keydown.enter.prevent="addImageLink" type="url" placeholder="https://images.unsplash.com/photo-..." aria-label="Image link" class="field field-sm flex-1 min-w-0">
             <button type="button" @click="addImageLink" class="btn btn-secondary btn-sm"><i class="fa-solid fa-link"></i> Add link</button>
           </div>
-          <div class="flex flex-wrap items-center gap-3 mt-2">
-            <button type="button" @click="imageFile.click()" class="btn btn-secondary btn-sm"><i class="fa-solid fa-upload"></i> Import from my computer</button>
-            <input ref="imageFile" type="file" accept="image/*" multiple class="hidden" @change="importImages">
-            <span class="text-xs text-slate-500">{{ form.images.length }} / {{ MAX_IMAGES }} images</span>
-          </div>
+          <p class="text-xs text-slate-500 mt-2">{{ form.images.length }} / {{ MAX_IMAGES }} images</p>
           <p v-if="imageError" role="alert" class="text-xs font-semibold text-rose-600 mt-2">{{ imageError }}</p>
 
           <ul v-if="form.images.length" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-3">
@@ -123,9 +118,8 @@ import { useRecipes } from '../composables/useRecipes'
 import { usePantry } from '../composables/usePantry'
 import { useUI } from '../composables/useUI'
 import { useImages } from '../composables/useImages'
-import { apiFetch } from '../utils/api'
 import {
-  UNITS, MAX_IMAGES, emptyRecipeForm, ingredientKey, instructionSteps, resizeImage, imgSrc
+  UNITS, MAX_IMAGES, emptyRecipeForm, ingredientKey, instructionSteps, imgSrc
 } from '../utils/recipes'
 
 const router = useRouter()
@@ -139,7 +133,7 @@ const editingId = editingRecipe.value ? editingRecipe.value.id : null
 const form = reactive(editingRecipe.value
   ? {
       title: editingRecipe.value.title,
-      category: editingRecipe.value.category,
+      category: editingRecipe.value.category === 'Quick' ? 'Main' : editingRecipe.value.category,   // « Quick » n'est plus une catégorie
       prepTime: editingRecipe.value.prepTime,
       images: [...(editingRecipe.value.images || [])],
       videoUrl: editingRecipe.value.videoUrl || '',
@@ -155,8 +149,7 @@ const form = reactive(editingRecipe.value
 const formErrors = ref([])
 const imageLinkInput = ref('')
 const imageError = ref('')
-const saving = ref(false)         // true while the imported pictures are being saved on the server
-const imageFile = ref(null)
+const saving = ref(false)         // true while the recipe is being saved (prevents a double submit)
 
 // ----- Images -----
 function addImageLink() {
@@ -185,34 +178,6 @@ function addImageLink() {
   }
   form.images.push(link)
   imageLinkInput.value = ''
-}
-
-async function importImages(event) {
-  const files = [...event.target.files]
-  event.target.value = ''                 // lets the user pick the same file again later
-  imageError.value = ''
-  for (const file of files) {
-    if (form.images.length >= MAX_IMAGES) {
-      imageError.value = `You can add up to ${MAX_IMAGES} images.`
-      break
-    }
-    if (!file.type.startsWith('image/')) {
-      imageError.value = `"${file.name}" is not an image.`
-      continue
-    }
-    try {
-      form.images.push(await resizeImage(file))
-    } catch (e) {
-      imageError.value = `"${file.name}" could not be read.`
-    }
-  }
-}
-
-// Sends an imported picture (data URL) to the server, which saves it in the backend/img folder
-async function uploadImage(dataUrl) {
-  const blob = await (await fetch(dataUrl)).blob()
-  const result = await apiFetch('/upload', { method: 'POST', body: blob, raw: true, contentType: 'image/jpeg' })
-  return result.url
 }
 
 const removeFormImage = (index) => form.images.splice(index, 1)
@@ -260,9 +225,8 @@ async function save() {
   saving.value = true
   formErrors.value = []
   try {
-    // Imported pictures are saved on the server; the recipe keeps their path
-    const images = await Promise.all(form.images.map(src => (src.startsWith('data:') ? uploadImage(src) : src)))
-    await saveRecipe({ title, category: form.category, prepTime: form.prepTime, images, videoUrl, ingredients, instructions }, editingId)
+    // Pictures are links (images.imageUrl / Recipes.images in the database)
+    await saveRecipe({ title, category: form.category, prepTime: form.prepTime, images: [...form.images], videoUrl, ingredients, instructions }, editingId)
     closeForm()
     // New recipes are private ("My Creations") until the author shares them
     if (!editingId) router.push('/my-creations')

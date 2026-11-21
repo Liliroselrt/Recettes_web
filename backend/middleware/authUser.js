@@ -25,11 +25,12 @@ async function identify(req) {
 
   const user = await User.findByPk(decoded.id, { attributes: ['id', 'username', 'role', 'isBanned', 'bannedReason'] });
   if (!user) return { status: 'unknown' };
-  if (user.isBanned) return { status: 'banned', reason: user.bannedReason };
+  // Un compte suspendu reste connecté (lecture, favoris...). Les routes qui commentent ou partagent
+  // vérifient `req.user.isBanned`.
 
   const asked = String(req.headers['x-view-as'] || '').toLowerCase();
   const viewAs = user.role === 'admin' && VIEW_AS_MODES.includes(asked) ? asked : null;
-  return { status: 'ok', user: { id: user.id, username: user.username, role: user.role, viewAs } };
+  return { status: 'ok', user: { id: user.id, username: user.username, role: user.role, viewAs, isBanned: !!user.isBanned, bannedReason: user.bannedReason } };
 }
 
 module.exports = identify;

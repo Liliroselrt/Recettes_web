@@ -41,6 +41,27 @@ const User = sequelize.define('User', {
         type: DataTypes.TEXT,
         allowNull: true
     },
+    // Profil public (colonnes du schéma SQL)
+    bio: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    avatarUrl: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    location: {
+        type: DataTypes.STRING(150),
+        allowNull: true
+    },
+    specialty: {
+        type: DataTypes.STRING(150),
+        allowNull: true
+    },
+    websiteUrl: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
     // FALSE = la personne ne peut plus signaler (décision d'un modérateur ou d'un admin)
     canReport: {
         type: DataTypes.BOOLEAN,

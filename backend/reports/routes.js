@@ -6,6 +6,7 @@
 // Table `Reports` ; les décisions sont prises depuis la page de modération (moderation/routes.js).
 // ==========================================================================
 const express = require('express')
+const { effectiveRole } = require('../middleware/roles')
 const { QueryTypes } = require('sequelize')
 
 const TARGET_TYPES = ['recipe', 'user', 'review']
@@ -98,9 +99,13 @@ function createReportsRouter({ sequelize, authenticate, getUserId = (req) => req
     try {
       const me = getUserId(req)
       const [user] = await select('SELECT canReport, reportBlockedReason FROM Users WHERE id = :me', { me })
+      // Les utilisateurs et abonnés ne voient que les signalements ayant donné lieu à une décision :
+      // ni ceux en cours de traitement, ni ceux rejetés. Les modérateurs et admins voient tout.
+      const staff = ['moderator', 'admin'].includes(effectiveRole(req.user))
       const reports = await select(
         `SELECT id, targetType, targetLabel, reason, status, action, decisionMessage, createdAt, updatedAt
-           FROM Reports WHERE targetOwnerId = :me ORDER BY createdAt DESC LIMIT 200`, { me })
+           FROM Reports WHERE targetOwnerId = :me ${staff ? '' : "AND status = 'action_taken'"}
+          ORDER BY createdAt DESC LIMIT 200`, { me })
       res.json({
         canReport: user ? !!user.canReport : true,
         reportBlockedReason: user ? user.reportBlockedReason : null,

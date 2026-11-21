@@ -22,7 +22,7 @@
         </div>
         <div>
           <label class="field-label" for="pay-number">Card number</label>
-          <input id="pay-number" :value="cardNumber" @input="onNumber" type="text" inputmode="numeric" autocomplete="cc-number" placeholder="4242 4242 4242 4242" class="field">
+          <input id="pay-number" :value="cardNumber" @input="onNumber" type="text" inputmode="numeric" maxlength="19" autocomplete="cc-number" placeholder="4242 4242 4242 4242" class="field">
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
@@ -59,7 +59,7 @@ const errorMessage = ref('')
 const paying = ref(false)
 
 const digits = (value) => String(value).replace(/\D/g, '')
-const onNumber = (e) => { cardNumber.value = digits(e.target.value).slice(0, 19).replace(/(.{4})/g, '$1 ').trim(); e.target.value = cardNumber.value }
+const onNumber = (e) => { cardNumber.value = digits(e.target.value).slice(0, 16).replace(/(.{4})/g, '$1 ').trim(); e.target.value = cardNumber.value }
 const onExpiry = (e) => {
   const d = digits(e.target.value).slice(0, 4)
   expiry.value = d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d
@@ -72,7 +72,7 @@ const close = () => { if (!paying.value) emit('close') }
 function validate() {
   const number = digits(cardNumber.value)
   if (!cardName.value.trim()) return 'Enter the name on the card.'
-  if (number.length < 13) return 'Enter a valid card number.'
+  if (number.length < 13 || number.length > 16) return 'Enter a valid card number (13 to 16 digits).'
   const [mm, yy] = expiry.value.split('/').map(Number)
   if (!mm || mm < 1 || mm > 12 || !Number.isInteger(yy)) return 'Enter the expiry date as MM/YY.'
   const now = new Date()

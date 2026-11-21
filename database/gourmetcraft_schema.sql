@@ -16,7 +16,13 @@
 --   * Recipes.shared    : FALSE = recette privée ("My Creations"), TRUE = partagée.
 --                         Défaut TRUE : les recettes insérées à la main sont publiques.
 --   * Recipes.sharedAt  : date/heure du partage.
+--   * Users.canReport / reportBlockedReason, Reports.targetOwnerId / targetLabel / action /
+--     decisionMessage, table AdminLogs : modération et signalements.
+--   * Recipes.isHidden  : TRUE = recette masquée par la modération (visible seulement par son auteur).
 --   * Favorites         : favoris par utilisateur (le coeur sur une recette).
+--   * CookedRecipes     : historique des recettes faites par chaque utilisateur.
+--   * Reviews           : contrainte UNIQUE (recipeId, userId) = une seule review par
+--                         personne et par recette (l'avis existant est modifié).
 --
 -- CONVENTIONS DE DONNÉES (lues par le backend, voir backend/utils/ingredients.js) :
 --   * Recipes.ingredients : une ligne par ingrédient, ex. « 150 g sugar »,
@@ -51,6 +57,8 @@ CREATE TABLE IF NOT EXISTS `Users` (
   `websiteUrl`    VARCHAR(255)                       DEFAULT NULL,
   `isBanned`      BOOLEAN                            NOT NULL DEFAULT FALSE,
   `bannedReason`  TEXT                               DEFAULT NULL,
+  `canReport`           BOOLEAN                      NOT NULL DEFAULT TRUE,  -- [APP] FALSE = ne peut plus signaler (décision de la modération)
+  `reportBlockedReason` TEXT                         DEFAULT NULL,           -- [APP] raison du retrait du droit de signaler
   `createdAt`     DATETIME                           NOT NULL,
   `updatedAt`     DATETIME                           NOT NULL,
   PRIMARY KEY (`id`),
@@ -73,6 +81,7 @@ CREATE TABLE IF NOT EXISTS `Recipes` (
   `images`            TEXT          DEFAULT NULL,           -- [APP] toutes les images (JSON) ; imageUrl = la 1re
   `shared`            BOOLEAN       NOT NULL DEFAULT TRUE,  -- [APP] FALSE = recette privée (My Creations)
   `sharedAt`          DATETIME      DEFAULT NULL,           -- [APP] date/heure du partage
+  `isHidden`          BOOLEAN       NOT NULL DEFAULT FALSE, -- [APP] TRUE = masquée par la modération
   `createdAt`         DATETIME      NOT NULL,
   `updatedAt`         DATETIME      NOT NULL,
   `userId`            INT           DEFAULT NULL,
@@ -94,6 +103,8 @@ CREATE TABLE IF NOT EXISTS `Reviews` (
   PRIMARY KEY (`id`),
   KEY `recipeId` (`recipeId`),
   KEY `userId` (`userId`),
+  -- [APP] Une seule review par personne et par recette (modifiable depuis l'application)
+  UNIQUE KEY `Reviews_recipe_user_unique` (`recipeId`, `userId`),
   CONSTRAINT `Reviews_chk_rating` CHECK (`rating` BETWEEN 1 AND 5),
   CONSTRAINT `Reviews_ibfk_1` FOREIGN KEY (`recipeId`) REFERENCES `Recipes` (`id`)
     ON DELETE CASCADE ON UPDATE CASCADE,
@@ -124,6 +135,27 @@ CREATE TABLE IF NOT EXISTS `Favorites` (
     ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `Favorites_ibfk_2` FOREIGN KEY (`recipeId`) REFERENCES `Recipes` (`id`)
     ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- [APP] Historique des recettes faites (bouton « I cooked this »).
+-- Le titre et l'image sont recopiés : l'historique reste lisible si la recette est supprimée (recipeId -> NULL).
+CREATE TABLE IF NOT EXISTS `CookedRecipes` (
+  `id`          INT          NOT NULL AUTO_INCREMENT,
+  `userId`      INT          NOT NULL,
+  `recipeId`    INT          DEFAULT NULL,
+  `recipeTitle` VARCHAR(255) NOT NULL,
+  `recipeImage` TEXT         DEFAULT NULL,
+  `note`        VARCHAR(300) DEFAULT NULL,
+  `cookedAt`    DATETIME     NOT NULL,
+  `createdAt`   DATETIME     NOT NULL,
+  `updatedAt`   DATETIME     NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `userId_cookedAt` (`userId`, `cookedAt`),
+  KEY `recipeId` (`recipeId`),
+  CONSTRAINT `CookedRecipes_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `Users` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `CookedRecipes_ibfk_2` FOREIGN KEY (`recipeId`) REFERENCES `Recipes` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------------------------
@@ -315,11 +347,16 @@ CREATE TABLE IF NOT EXISTS `Reports` (
   `status`        ENUM('pending', 'reviewed', 'action_taken', 'dismissed')                  NOT NULL DEFAULT 'pending',
   `reviewedBy`    INT                                                                       DEFAULT NULL,
   `moderatorNote` TEXT                                                                      DEFAULT NULL,
+  `targetOwnerId` INT                                                                       DEFAULT NULL,   -- [APP] auteur du contenu signalé
+  `targetLabel`   VARCHAR(255)                                                              DEFAULT NULL,   -- [APP] nom affiché (titre de la recette, pseudo, extrait de l'avis)
+  `action`        VARCHAR(30)                                                               DEFAULT NULL,   -- [APP] none | warning | recipe_hidden | recipe_deleted | review_deleted | user_banned
+  `decisionMessage` TEXT                                                                    DEFAULT NULL,   -- [APP] message de la modération montré à la personne concernée
   `createdAt`     DATETIME                                                                  NOT NULL,
   `updatedAt`     DATETIME                                                                  NOT NULL,
   PRIMARY KEY (`id`),
   KEY `reporterId` (`reporterId`),
   KEY `reviewedBy` (`reviewedBy`),
+  KEY `targetOwnerId` (`targetOwnerId`),
   CONSTRAINT `Reports_ibfk_1` FOREIGN KEY (`reporterId`) REFERENCES `Users` (`id`)
     ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `Reports_ibfk_2` FOREIGN KEY (`reviewedBy`) REFERENCES `Users` (`id`)
@@ -339,3 +376,63 @@ CREATE TABLE IF NOT EXISTS `UserBlocks` (
   CONSTRAINT `UserBlocks_ibfk_2` FOREIGN KEY (`blockedId`) REFERENCES `Users` (`id`)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- [APP] Journal d'activité des modérateurs et admins (page Admin > Activity log)
+CREATE TABLE IF NOT EXISTS `AdminLogs` (
+  `id`         INT          NOT NULL AUTO_INCREMENT,
+  `adminId`    INT          DEFAULT NULL,
+  `action`     VARCHAR(60)  NOT NULL,
+  `targetType` VARCHAR(30)  DEFAULT NULL,
+  `targetId`   INT          DEFAULT NULL,
+  `details`    TEXT         DEFAULT NULL,
+  `createdAt`  DATETIME     NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `adminId` (`adminId`),
+  CONSTRAINT `AdminLogs_ibfk_1` FOREIGN KEY (`adminId`) REFERENCES `Users` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Messagerie : réponses aux tickets + option « admins seulement »
+CREATE TABLE IF NOT EXISTS `ModTicketMessages` (
+  `id`         INT      NOT NULL AUTO_INCREMENT,
+  `ticketId`   INT      NOT NULL,
+  `senderId`   INT      DEFAULT NULL,
+  `isStaff`    TINYINT(1) NOT NULL DEFAULT 0,
+  `readByUser` TINYINT(1) NOT NULL DEFAULT 0,
+  `content`    TEXT     NOT NULL,
+  `createdAt`  DATETIME NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ticketId` (`ticketId`),
+  KEY `senderId` (`senderId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2) Colonne « admins seulement » : ajoutée seulement si elle manque
+SET @missing = (SELECT COUNT(*) = 0 FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND LOWER(TABLE_NAME) = 'modcontacttickets'
+                   AND COLUMN_NAME = 'adminOnly');
+SET @sql = IF(@missing,
+  'ALTER TABLE `ModContactTickets` ADD COLUMN `adminOnly` TINYINT(1) NOT NULL DEFAULT 0',
+  'SELECT ''adminOnly existe deja'' AS info');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 3) Propriétaire d'un groupe de conversation : ajouté seulement s'il manque
+SET @missing = (SELECT COUNT(*) = 0 FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND LOWER(TABLE_NAME) = 'chatrooms'
+                   AND COLUMN_NAME = 'createdBy');
+SET @sql = IF(@missing,
+  'ALTER TABLE `ChatRooms` ADD COLUMN `createdBy` INT DEFAULT NULL',
+  'SELECT ''createdBy existe deja'' AS info');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 4) Clés étrangères (optionnelles : la messagerie fonctionne sans).
+--    Si une de ces deux lignes échoue, ignorez l'erreur : ce sont seulement des garde-fous.
+ALTER TABLE `ModTicketMessages`
+  ADD CONSTRAINT `ModTicketMessages_fk_ticket` FOREIGN KEY (`ticketId`) REFERENCES `ModContactTickets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ModTicketMessages`
+  ADD CONSTRAINT `ModTicketMessages_fk_sender` FOREIGN KEY (`senderId`) REFERENCES `Users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;

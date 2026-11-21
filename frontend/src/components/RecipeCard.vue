@@ -61,19 +61,18 @@
 
     <!-- Card Footer & Actions (every button uses .stop so it does not also open the recipe) -->
     <div class="px-6 pb-6 pt-4 border-t border-orange-50 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center space-x-2 text-xs text-slate-500">
-        <div class="w-7 h-7 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold">
-          {{ recipe.author.charAt(0).toUpperCase() }}
-        </div>
-        <span>By <strong class="text-slate-700 font-semibold">{{ recipe.author }}</strong></span>
-      </div>
+      <!-- Click the author to open their profile -->
+      <RouterLink :to="`/users/${recipe.userId}`" @click.stop class="group/author flex items-center space-x-2 text-xs text-slate-500" :title="`See the profile of ${recipe.author}`">
+        <UserAvatar :name="recipe.author" :src="recipe.authorAvatar" size="xs" />
+        <span>By <strong class="text-slate-700 font-semibold group-hover/author:text-brand-600 group-hover/author:underline">{{ recipe.author }}</strong></span>
+      </RouterLink>
 
       <div class="flex items-center gap-2">
         <button @click.stop="$emit('open', recipe)" class="btn btn-secondary btn-sm">
           <i class="fa-regular fa-eye"></i> View
         </button>
         <template v-if="isOwner(recipe)">
-          <button @click.stop="onShare" class="btn btn-sm" :class="recipe.shared ? 'btn-secondary' : 'btn-primary'">
+          <button @click.stop="onShare" class="btn btn-sm" :class="recipe.shared ? 'btn-secondary' : 'btn-primary'" :disabled="isRestricted && !recipe.shared" :title="isRestricted && !recipe.shared ? 'Your account is suspended: you cannot share recipes' : ''">
             <i :class="recipe.shared ? 'fa-solid fa-eye-slash' : 'fa-solid fa-share-nodes'"></i> {{ recipe.shared ? 'Unshare' : 'Share' }}
           </button>
           <button @click.stop="openEdit(recipe)" title="Edit" aria-label="Edit recipe" class="btn btn-secondary btn-icon btn-sm">
@@ -91,9 +90,11 @@
 <script setup>
 import { computed } from 'vue'
 import RecipeCarousel from './RecipeCarousel.vue'
+import UserAvatar from './UserAvatar.vue'
 import { useRecipes } from '../composables/useRecipes'
 import { usePantry } from '../composables/usePantry'
 import { useUI } from '../composables/useUI'
+import { useRoles } from '../composables/useRoles'
 import { useAuth } from '../composables/useAuth'
 import { recipeTimeLabel } from '../utils/recipes'
 
@@ -106,6 +107,7 @@ const { isOwner, totalFavorites, ratingLabel, latestReview, toggleFavorite, togg
 const { pantryCount, pantryMatch, pantryMatchText } = usePantry()
 const { openAuth, openEdit } = useUI()
 const { isLoggedIn } = useAuth()
+const { isRestricted } = useRoles()
 
 const match = computed(() => pantryMatch(props.recipe))
 

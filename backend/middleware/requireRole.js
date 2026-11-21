@@ -11,6 +11,8 @@ module.exports = (...allowed) => async (req, res, next) => {
     if (result.status === 'unknown') return res.status(401).json({ error: 'Your account no longer exists. Please log in again.' });
     if (result.status === 'banned') return res.status(403).json({ error: 'Your account is suspended.' });
 
+    if (result.user.isBanned) return res.status(403).json({ error: 'Your account is suspended.' });
+
     const role = effectiveRole(result.user);
     if (!allowed.includes(role)) return res.status(403).json({ error: 'You do not have permission to do this.' });
     req.user = { ...result.user, effectiveRole: role };

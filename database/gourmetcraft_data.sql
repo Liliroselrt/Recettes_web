@@ -163,8 +163,8 @@ INSERT INTO `ChatMessages` (`id`, `roomId`, `senderId`, `content`, `isDeleted`, 
 INSERT INTO `ModContactTickets` (`id`, `userId`, `assignedModId`, `subject`, `category`, `message`, `status`, `adminReply`, `createdAt`, `updatedAt`) VALUES
   (1, 6, 10, 'Question about creator video payouts', 'billing', 'Hello moderators, how do I set up my payout details for my premium video recipes?', 'resolved', 'Hi Julie! You can configure your creator payout method directly in your Profile Settings tab.', '2026-11-08 14:00:00', '2026-11-08 16:20:00');
 
-INSERT INTO `Reports` (`id`, `reporterId`, `targetType`, `targetId`, `reason`, `details`, `status`, `reviewedBy`, `moderatorNote`, `createdAt`, `updatedAt`) VALUES
-  (1, 2, 'review', 27, 'other', 'Test report example for moderation queue.', 'dismissed', 10, 'Constructive taste feedback, within community guidelines.', '2026-11-09 09:00:00', '2026-11-09 10:15:00');
+INSERT INTO `Reports` (`id`, `reporterId`, `targetType`, `targetId`, `targetOwnerId`, `targetLabel`, `reason`, `details`, `status`, `action`, `reviewedBy`, `moderatorNote`, `createdAt`, `updatedAt`) VALUES
+  (1, 2, 'review', 27, 8, 'Review on a recipe: Good, but a little too sweet for me.', 'other', 'Test report example for moderation queue.', 'dismissed', 'none', 10, 'Constructive taste feedback, within community guidelines.', '2026-11-09 09:00:00', '2026-11-09 10:15:00');
 
 INSERT INTO `UserBlocks` (`blockerId`, `blockedId`, `reason`, `createdAt`) VALUES
   (7, 4, 'Prefer not to see meat-heavy BBQ posts in feed', '2026-11-06 18:00:00');

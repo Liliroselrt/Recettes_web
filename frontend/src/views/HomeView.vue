@@ -24,7 +24,6 @@
             <option value="Starter">Starters</option>
             <option value="Main">Main Courses</option>
             <option value="Dessert">Desserts</option>
-            <option value="Quick">Quick (&lt; 20 min)</option>
           </select>
         </div>
       </div>
@@ -38,8 +37,7 @@
       <div>
         <h2 class="text-2xl font-bold text-slate-900">
           <span v-if="currentTab === 'home'">All Recipes</span>
-          <span v-else-if="currentTab === 'my-creations'">My Creations</span>
-          <span v-else>My Favorite Recipes</span>
+          <span v-else>My Creations</span>
         </h2>
         <p class="text-slate-500 text-sm mt-1">
           {{ filteredRecipes.length }} recipe(s) available
@@ -47,8 +45,8 @@
         </p>
       </div>
 
-      <!-- Category Pills Quick Filter -->
-      <div class="flex flex-wrap gap-2">
+      <!-- Dish types + two quick filters -->
+      <div class="flex flex-wrap items-center gap-2">
         <button v-for="cat in CATEGORIES" :key="cat.value" @click="selectedCategory = cat.value" :class="categoryPillStyle(cat.value)">
           {{ cat.emoji }} {{ cat.label }}
         </button>
@@ -64,7 +62,9 @@
           <option value="trending">Trending</option>
           <option value="top-rated">Top rated</option>
           <option value="most-reviewed">Most reviewed</option>
-          <option value="quickest">Quickest</option>
+          <option value="quickest">Quickest (under 20 min)</option>
+          <option value="most-favorited">Most favorited</option>
+          <option v-if="isLoggedIn && following.length > 0" value="followed-first">Chefs I follow first</option>
           <option v-if="pantryCount > 0" value="best-match">Best pantry match</option>
         </select>
       </div>
@@ -73,6 +73,33 @@
         <span>My Pantry</span>
         <span v-if="pantryCount > 0" class="bg-white text-brand-600 text-xs font-bold px-2 py-0.5 rounded-full">{{ pantryCount }}</span>
         <i :class="showPantry ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down'" class="text-xs"></i>
+      </button>
+    </div>
+
+    <!-- Filters: chefs I follow, recipes with a video -->
+    <div class="flex flex-wrap items-center gap-2 mb-6">
+      <template v-if="isLoggedIn && currentTab !== 'my-creations'">
+        <span class="field-label mb-0 mr-1">Chefs</span>
+        <button type="button" :class="chefScope === 'all' ? 'pill pill-active' : 'pill'" :aria-pressed="chefScope === 'all'" @click="chefScope = 'all'">Everyone</button>
+        <button type="button" :class="chefScope === 'following' ? 'pill pill-active' : 'pill'" :aria-pressed="chefScope === 'following'" @click="chefScope = 'following'">
+          <i class="fa-solid fa-user-group mr-1"></i> People I follow ({{ following.length }})
+        </button>
+        <select v-if="chefScope === 'following' && following.length > 0" v-model="chefId" class="field field-sm field-auto font-semibold" aria-label="Show the recipes of one chef I follow">
+          <option value="">All the chefs I follow</option>
+          <option v-for="p in followingByName" :key="p.id" :value="String(p.id)">{{ p.username }}</option>
+        </select>
+        <span class="mx-1 text-slate-300 hidden sm:inline">|</span>
+      </template>
+      <!-- Only what I can cook with the ingredients ticked in My Pantry -->
+      <button type="button" :class="canMakeActive ? 'pill pill-active' : 'pill'" :aria-pressed="canMakeActive" title="Only the recipes I can make with the ingredients of My Pantry" @click="toggleCookable">
+        🧺 What I can cook
+      </button>
+      <!-- Only my favorite recipes (there is no separate Favorites page anymore) -->
+      <button type="button" :class="onlyFavorites ? 'pill pill-active' : 'pill'" :aria-pressed="onlyFavorites" title="Only my favorite recipes" @click="toggleFavorites">
+        ❤️ My favorites<span v-if="isLoggedIn"> ({{ favoriteCount }})</span>
+      </button>
+      <button type="button" :class="onlyVideo ? 'pill pill-active' : 'pill'" :aria-pressed="onlyVideo" @click="onlyVideo = !onlyVideo">
+        <i class="fa-solid fa-video mr-1"></i> With video
       </button>
     </div>
 
@@ -119,30 +146,66 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import RecipeCard from '../components/RecipeCard.vue'
 import RecipeModal from '../components/RecipeModal.vue'
+import { useGuestLimit } from '../composables/useGuestLimit'
 import PantryPanel from '../components/PantryPanel.vue'
 import { useRecipes } from '../composables/useRecipes'
 import { usePantry } from '../composables/usePantry'
 import { useAuth } from '../composables/useAuth'
+import { useFollowing } from '../composables/useFollowing'
 import { useUI } from '../composables/useUI'
 import { CATEGORIES } from '../utils/recipes'
 
 const route = useRoute()
 const { isLoggedIn } = useAuth()
-const { openCreate } = useUI()
-const { recipes, loading, error, fetchRecipes, isOwner, totalFavorites, averageRating } = useRecipes()
+const { openCreate, openAuth } = useUI()
+const { recipes, loading, error, fetchRecipes, isOwner, totalFavorites, averageRating, favoriteCount } = useRecipes()
 const { pantryCount, onlyCookable, pantryMatch, clearPantry } = usePantry()
+const { following, followingIds, loadFollowing } = useFollowing()
 
-// 'home' | 'my-creations' | 'favorites' (defined by the route)
+// 'home' | 'my-creations' (defined by the route)
 const currentTab = computed(() => route.meta.tab)
 
 const searchQuery = ref('')
-const selectedCategory = ref('')    // '' | 'Starter' | 'Main' | 'Dessert' | 'Quick'
+const selectedCategory = ref('')    // '' | 'Starter' | 'Main' | 'Dessert'
 const sortBy = ref('recent')        // 'recent' | 'trending' | 'top-rated' | 'most-reviewed' | 'quickest' | 'best-match'
 const showPantry = ref(false)
+const QUICK_MINUTES = 20           // "Quickest" keeps the recipes under this duration
+const chefScope = ref('all')      // 'all' | 'following'
+const chefId = ref('')            // '' = all the chefs I follow, otherwise the id of one of them
+const onlyVideo = ref(false)
+const onlyFavorites = ref(false)
+
+// "What I can cook": uses the ingredients ticked in My Pantry. With an empty pantry, the pantry opens instead.
+const canMakeActive = computed(() => onlyCookable.value && pantryCount.value > 0)
+const toggleCookable = () => {
+  if (pantryCount.value === 0) { showPantry.value = true; return }
+  onlyCookable.value = !onlyCookable.value
+}
+const toggleFavorites = () => {
+  if (!isLoggedIn.value) return openAuth()   // favorites belong to an account
+  onlyFavorites.value = !onlyFavorites.value
+}
+const followingByName = computed(() => [...following.value].sort((a, b) => a.username.localeCompare(b.username)))
+
+// The list may have changed since the last visit (follow / unfollow on a profile)
+onMounted(() => { if (isLoggedIn.value) loadFollowing() })
+
+// Logging out, or no longer following anyone: back to the normal list and sorting
+watch(isLoggedIn, (ok) => {
+  if (ok) return
+  chefScope.value = 'all'
+  onlyFavorites.value = false
+  if (sortBy.value === 'followed-first') sortBy.value = 'recent'
+})
+watch(chefScope, (scope) => { if (scope === 'all') chefId.value = '' })
+watch(following, (list) => {
+  if (chefId.value && !list.some(p => String(p.id) === chefId.value)) chefId.value = ''
+  if (list.length === 0 && sortBy.value === 'followed-first') sortBy.value = 'recent'
+})
 const selectedId = ref(null)
 
 const categoryPillStyle = (cat) => (selectedCategory.value === cat ? 'pill pill-active' : 'pill')
@@ -189,6 +252,15 @@ const sortRecipes = (list) => {
     case 'quickest':
       sorted.sort((a, b) => a.prepTime - b.prepTime || byRecent(a, b))
       break
+    case 'most-favorited':
+      sorted.sort((a, b) => totalFavorites(b) - totalFavorites(a) || byRecent(a, b))
+      break
+    case 'followed-first': {
+      // Recipes of the people I follow first, each group from the most recent
+      const followed = (r) => (followingIds.value.has(r.userId) ? 1 : 0)
+      sorted.sort((a, b) => followed(b) - followed(a) || byRecent(a, b))
+      break
+    }
     case 'best-match':
       if (pantryCount.value > 0) {
         const score = (r) => { const m = pantryMatch(r); return m.total ? m.matched / m.total : 1 }
@@ -210,24 +282,36 @@ const filteredRecipes = computed(() => {
   const list = recipes.value.filter(r => {
     const matchesTab =
       (currentTab.value === 'home' && r.shared) ||
-      (currentTab.value === 'my-creations' && isOwner(r)) ||
-      (currentTab.value === 'favorites' && (r.shared || isOwner(r)) && r.isFavorite)
+      (currentTab.value === 'my-creations' && isOwner(r))
 
     const matchesSearch = r.title.toLowerCase().includes(query) ||
       r.ingredients.some(ing => ing.name.toLowerCase().includes(query))
 
     const matchesCat = !selectedCategory.value || r.category === selectedCategory.value
     const matchesPantry = !pantryFilterOn || pantryMatch(r).canMake
+    const matchesFavorite = !onlyFavorites.value || r.isFavorite
+    // "Quickest": every recipe that takes less than 20 minutes (sorted from the fastest below)
+    const matchesQuick = sortBy.value !== 'quickest' || Number(r.prepTime) < QUICK_MINUTES
+    const matchesVideo = !onlyVideo.value || r.hasVideo
 
-    return matchesTab && matchesSearch && matchesCat && matchesPantry
+    // "People I follow": all of them, or just the chef picked in the list (not used on "My Creations")
+    const matchesChef = currentTab.value === 'my-creations' || chefScope.value !== 'following' ||
+      (chefId.value ? String(r.userId) === chefId.value : followingIds.value.has(r.userId))
+
+    return matchesTab && matchesSearch && matchesCat && matchesPantry && matchesFavorite && matchesQuick && matchesVideo && matchesChef
   })
 
   return sortRecipes(list)
 })
 
 // ----- Recipe window: previous / next follow the list currently displayed -----
-const openRecipeDetail = (recipe) => { selectedId.value = recipe.id }
-const goToRecipe = (recipe) => { if (recipe) selectedId.value = recipe.id }
+const { allowRecipe } = useGuestLimit()
+const openRecipeDetail = (recipe) => { if (allowRecipe(recipe.id)) selectedId.value = recipe.id }
+const goToRecipe = (recipe) => {
+  if (!recipe) return
+  if (allowRecipe(recipe.id)) selectedId.value = recipe.id
+  else selectedId.value = null   // limite atteinte : la fenêtre de connexion s'ouvre
+}
 
 const selectedRecipe = computed(() =>
   selectedId.value === null ? null : recipes.value.find(r => r.id === selectedId.value) || null)
@@ -242,6 +326,14 @@ const nextRecipe = computed(() => {
 
 // Message shown when no recipe matches
 const emptyMessage = computed(() => {
+  if (chefScope.value === 'following' && currentTab.value !== 'my-creations') {
+    return following.value.length === 0
+      ? 'You do not follow anyone yet. Open a cook\'s profile (or the People I follow page) to follow cooks and see their recipes here.'
+      : 'No recipe from the people you follow matches your search. Try another chef, or switch back to Everyone.'
+  }
+  if (sortBy.value === 'quickest') return 'No recipe under 20 minutes matches your search. Choose another sorting to see more.'
+  if (onlyFavorites.value) return 'None of your favorites matches your search. Tap the heart on a recipe to save it, or turn off “My favorites”.'
+  if (onlyVideo.value) return 'No recipe with a video matches your search. Turn off “With video” to see more.'
   if (onlyCookable.value && pantryCount.value > 0) {
     return 'No recipe matches your pantry yet. Tick more ingredients or turn off "Only recipes I can make".'
   }
@@ -249,11 +341,6 @@ const emptyMessage = computed(() => {
     return isLoggedIn.value
       ? 'You have not created any recipe yet. Create one, then share it with the community when it is ready.'
       : 'Log in to create recipes and find them here.'
-  }
-  if (currentTab.value === 'favorites') {
-    return isLoggedIn.value
-      ? 'Tap the heart on a recipe to save it here.'
-      : 'Log in to save your favorite recipes here.'
   }
   return 'Try changing your search or add your own recipe to enrich the community cookbook.'
 })

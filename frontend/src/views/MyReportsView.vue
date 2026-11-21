@@ -3,7 +3,8 @@
     <div class="mb-6">
       <h1 class="text-3xl font-extrabold text-slate-900">Reports about me</h1>
       <p class="text-slate-600 mt-1 text-sm">
-        Reports other members made about your recipes, reviews or profile, and what the moderators decided.
+        <template v-if="isModerator">Reports other members made about your recipes, reviews or profile, and what the moderators decided.</template>
+        <template v-else>Decisions the moderators took after reports about your recipes, reviews or profile. Reports still being reviewed or dismissed are not shown.</template>
         The names of the people who report are never shown.
       </p>
     </div>
@@ -24,14 +25,14 @@
 
         <div v-if="data.reports.length" class="flex flex-wrap gap-2 mb-5">
           <span class="tag">{{ data.reports.length }} report{{ data.reports.length > 1 ? 's' : '' }}</span>
-          <span class="tag tag-warn">{{ pendingCount }} under review</span>
+          <span v-if="pendingCount > 0" class="tag tag-warn">{{ pendingCount }} under review</span>
           <span class="tag">{{ warningCount }} with a decision</span>
         </div>
 
         <div v-if="!data.reports.length" class="panel p-8 text-center text-slate-600">
           <i class="fa-regular fa-face-smile text-3xl text-brand-500 mb-3"></i>
           <p class="font-semibold text-slate-800">Nothing to show</p>
-          <p class="text-sm mt-1">No report has been made about you.</p>
+          <p class="text-sm mt-1">No decision has been taken about you.</p>
         </div>
 
         <div class="space-y-4">
@@ -71,10 +72,12 @@ import { ref, computed, watch } from 'vue'
 import { apiFetch } from '../utils/api'
 import { useAuth } from '../composables/useAuth'
 import { useUI } from '../composables/useUI'
+import { useRoles } from '../composables/useRoles'
 import { REASON_LABELS, TARGET_LABELS, TARGET_ICONS, ACTION_LABELS, statusInfo, formatDate } from '../utils/reports'
 
 const { isLoggedIn, token } = useAuth()
 const { openAuth } = useUI()
+const { isModerator } = useRoles()
 
 const data = ref(null)
 const loading = ref(false)
@@ -88,7 +91,10 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    data.value = await apiFetch('/reports/about-me')
+    const result = await apiFetch('/reports/about-me')
+    // Users and subscribers only see the reports that led to a decision (never "under review" or dismissed ones)
+    if (!isModerator.value) result.reports = result.reports.filter(r => r.status === 'action_taken')
+    data.value = result
   } catch (e) {
     error.value = e.message
   } finally {

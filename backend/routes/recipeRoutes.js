@@ -14,5 +14,6 @@ router.delete('/:id', authMiddleware, recipeController.deleteRecipe);
 
 router.post('/:id/reviews', authMiddleware, recipeController.addReview);
 router.post('/:id/favorite', authMiddleware, recipeController.toggleFavorite);
+router.post('/:id/cooked', authMiddleware, recipeController.markCooked);
 
 module.exports = router;

@@ -39,9 +39,7 @@ exports.login = async (req, res) => {
             return res.status(401).json({ error: "Incorrect password." });
         }
 
-        if (user.isBanned) {
-            return res.status(403).json({ error: `This account is suspended${user.bannedReason ? ': ' + user.bannedReason : '.'}` });
-        }
+        // Un compte suspendu peut se connecter : il ne peut simplement plus commenter ni partager de recette.
 
         const token = jwt.sign(
             { id: user.id, username: user.username },
@@ -52,7 +50,7 @@ exports.login = async (req, res) => {
         res.status(200).json({ 
             message: "Login successful", 
             token, 
-            user: { id: user.id, username: user.username, email: user.email, role: user.role } 
+            user: { id: user.id, username: user.username, email: user.email, role: user.role, isBanned: user.isBanned, avatarUrl: user.avatarUrl } 
         });
     } catch (error) {
         res.status(500).json({ error: "Login failed." });
@@ -62,8 +60,11 @@ exports.login = async (req, res) => {
 // Profil de la personne connectée (rôle réel, droit de signaler)
 exports.me = async (req, res) => {
     try {
-        const user = await User.findByPk(req.user.id, { attributes: ['id', 'username', 'role', 'canReport'] });
-        res.status(200).json({ id: user.id, username: user.username, role: user.role, canReport: user.canReport });
+        const user = await User.findByPk(req.user.id, { attributes: ['id', 'username', 'role', 'canReport', 'isBanned', 'bannedReason', 'bio', 'avatarUrl', 'location', 'specialty', 'websiteUrl'] });
+        res.status(200).json({
+            id: user.id, username: user.username, role: user.role, canReport: user.canReport, isBanned: user.isBanned, bannedReason: user.bannedReason,
+            bio: user.bio, avatarUrl: user.avatarUrl, location: user.location, specialty: user.specialty, websiteUrl: user.websiteUrl
+        });
     } catch (error) {
         res.status(500).json({ error: "Could not load your profile." });
     }
