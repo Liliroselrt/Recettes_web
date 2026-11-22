@@ -9,7 +9,7 @@
 
     <footer class="bg-slate-900 text-slate-400 py-8 border-t border-slate-800">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
-        <p>© 2026 GourmetCraft - Vue.js / Express &amp; MySQL Web Project (Université Paris / CPUT)</p>
+        <p>© 2026 Ef'recipe - Vue.js / Express &amp; MySQL Web Project (EFREI Panthéon Assas Université Paris / CPUT)</p>
       </div>
     </footer>
 

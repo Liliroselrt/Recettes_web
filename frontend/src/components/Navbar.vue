@@ -8,7 +8,7 @@
             <i class="fa-solid fa-utensils"></i>
           </span>
           <span class="hidden min-[430px]:block">
-            <span class="block text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-brand-700 via-brand-600 to-amber-600 bg-clip-text text-transparent">GourmetCraft</span>
+            <span class="block text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-brand-700 via-brand-600 to-amber-600 bg-clip-text text-transparent">Ef'Recipe</span>
             <span class="hidden sm:block text-xs font-semibold tracking-wider text-amber-700 uppercase">Community Cookbook</span>
           </span>
         </RouterLink>
