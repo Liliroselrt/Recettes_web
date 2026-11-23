@@ -24,8 +24,8 @@
       </div>
     </div>
 
-    <div v-if="!isLoggedIn" class="bg-white rounded-3xl p-10 text-center border-2 border-dashed border-amber-200">
-      <div class="w-16 h-16 bg-amber-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-2xl mb-3"><i class="fa-regular fa-message"></i></div>
+    <div v-if="!isLoggedIn" class="bg-white rounded-3xl p-10 text-center border-2 border-dashed border-brand-200">
+      <div class="w-16 h-16 bg-brand-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-2xl mb-3"><i class="fa-regular fa-message"></i></div>
       <p class="text-slate-500 mb-5">Log in to chat with other cooks and contact the team.</p>
       <button type="button" class="btn btn-primary btn-lg" @click="openAuth"><i class="fa-solid fa-user"></i> Log in</button>
     </div>

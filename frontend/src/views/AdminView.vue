@@ -53,7 +53,7 @@
           <div class="panel p-5">
             <h2 class="font-bold text-slate-900 mb-3">Reports by reason</h2>
             <p v-if="!stats.reports.byReason.length" class="text-sm text-slate-500">No report yet.</p>
-            <div v-for="x in stats.reports.byReason" :key="x.reason" class="flex justify-between text-sm py-1 border-b border-orange-50 last:border-0">
+            <div v-for="x in stats.reports.byReason" :key="x.reason" class="flex justify-between text-sm py-1 border-b border-brand-50 last:border-0">
               <span class="text-slate-700">{{ REASON_LABELS[x.reason] || x.reason }}</span>
               <span class="font-bold text-slate-900">{{ x.count }}</span>
             </div>
@@ -61,9 +61,9 @@
           <div class="panel p-5">
             <h2 class="font-bold text-slate-900 mb-3">Best rated recipes</h2>
             <p v-if="!stats.topRecipes.length" class="text-sm text-slate-500">No review yet.</p>
-            <div v-for="x in stats.topRecipes" :key="x.id" class="flex justify-between gap-3 text-sm py-1 border-b border-orange-50 last:border-0">
+            <div v-for="x in stats.topRecipes" :key="x.id" class="flex justify-between gap-3 text-sm py-1 border-b border-brand-50 last:border-0">
               <span class="text-slate-700 truncate">{{ x.title }}</span>
-              <span class="font-bold text-amber-500 shrink-0"><i class="fa-solid fa-star mr-1"></i>{{ x.rating }} <span class="text-slate-400 font-normal">({{ x.reviews }})</span></span>
+              <span class="font-bold text-brand-500 shrink-0"><i class="fa-solid fa-star mr-1"></i>{{ x.rating }} <span class="text-slate-400 font-normal">({{ x.reviews }})</span></span>
             </div>
           </div>
         </div>
@@ -112,11 +112,11 @@
         <p v-if="loadingUsers" class="text-sm text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading...</p>
         <div v-else class="panel overflow-x-auto">
           <table class="w-full text-sm">
-            <thead class="text-left text-xs text-slate-500 border-b border-orange-100">
+            <thead class="text-left text-xs text-slate-500 border-b border-brand-100">
               <tr><th class="p-3">User</th><th class="p-3">Role</th><th class="p-3">Activity</th><th class="p-3">Reporting</th><th class="p-3">Account</th></tr>
             </thead>
             <tbody>
-              <tr v-for="u in users" :key="u.id" class="border-b border-orange-50 last:border-0 align-top">
+              <tr v-for="u in users" :key="u.id" class="border-b border-brand-50 last:border-0 align-top">
                 <td class="p-3">
                   <p class="font-bold text-slate-900">{{ u.username }} <span v-if="u.id === myId" class="tag">You</span></p>
                   <p class="text-xs text-slate-500">{{ u.email }}</p>
@@ -164,7 +164,7 @@
       <!-- Activity log -->
       <section v-if="tab === 'logs'">
         <p v-if="loadingLogs" class="text-sm text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading...</p>
-        <div v-else class="panel divide-y divide-orange-50">
+        <div v-else class="panel divide-y divide-brand-50">
           <p v-if="!logs.length" class="p-6 text-center text-slate-500 text-sm">No action recorded yet.</p>
           <div v-for="l in logs" :key="l.id" class="p-4 text-sm flex flex-wrap items-start justify-between gap-2">
             <div>

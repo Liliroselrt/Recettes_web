@@ -13,7 +13,7 @@
       </button>
 
       <!-- Hero Header -->
-      <RecipeCarousel :recipe="recipe" height-class="h-64 sm:h-80 bg-gradient-to-tr from-brand-600 to-amber-500" always-show-arrows count-on-top>
+      <RecipeCarousel :recipe="recipe" height-class="h-64 sm:h-80 bg-gradient-to-tr from-brand-600 to-brand-500" always-show-arrows count-on-top>
         <span v-if="index >= 0" class="recipe-counter">Recipe {{ index + 1 }} of {{ total }}</span>
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"></div>
         <div class="absolute bottom-6 left-6 right-6 text-white pointer-events-none">
@@ -108,7 +108,7 @@
         </div>
 
         <!-- I cooked this: saves the recipe in my history and takes the used quantities out of my pantry -->
-        <section class="rounded-2xl border border-orange-100 bg-amber-50/60 p-5" aria-label="Cooked this recipe">
+        <section class="rounded-2xl border border-brand-100 bg-brand-50/60 p-5" aria-label="Cooked this recipe">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h4 class="text-lg font-bold text-slate-900 flex items-center">
@@ -225,7 +225,7 @@
         </section>
 
         <!-- Reviews & Comments Section -->
-        <div class="border-t border-orange-100 pt-6">
+        <div class="border-t border-brand-100 pt-6">
           <h4 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
             <i class="fa-solid fa-comments text-brand-500 mr-2"></i> Community reviews ({{ recipe.reviews.length }})
           </h4>
@@ -285,7 +285,7 @@
                   <span class="text-amber-400 text-sm" :aria-label="rev.rating + ' out of 5'">
                     <i v-for="s in 5" :key="s" :class="s <= rev.rating ? 'fa-solid fa-star' : 'fa-regular fa-star text-slate-300'"></i>
                   </span>
-                  <span class="text-xs font-bold text-amber-600">{{ rev.rating }}/5</span>
+                  <span class="text-xs font-bold text-brand-600">{{ rev.rating }}/5</span>
                 </div>
                 <p class="text-sm text-slate-700 leading-relaxed mt-2 break-words">{{ rev.comment }}</p>
               </div>
@@ -295,7 +295,7 @@
       </div>
 
       <!-- Previous / next recipe (small screens) -->
-      <div class="md:hidden sticky bottom-0 z-10 flex gap-3 p-3 bg-white/95 backdrop-blur border-t border-orange-100">
+      <div class="md:hidden sticky bottom-0 z-10 flex gap-3 p-3 bg-white/95 backdrop-blur border-t border-brand-100">
         <button type="button" @click="$emit('navigate', previous)" :disabled="!previous" class="btn btn-secondary btn-lg flex-1">
           <i class="fa-solid fa-chevron-left"></i> Previous
         </button>

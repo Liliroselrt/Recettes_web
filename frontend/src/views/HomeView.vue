@@ -120,8 +120,8 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else class="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-amber-200 my-8">
-      <div class="w-20 h-20 bg-amber-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-3xl mb-4">
+    <div v-else class="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-brand-200 my-8">
+      <div class="w-20 h-20 bg-brand-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-3xl mb-4">
         <i class="fa-solid fa-cookie-bite"></i>
       </div>
       <h3 class="text-xl font-bold text-slate-900 mb-2">No recipes found</h3>

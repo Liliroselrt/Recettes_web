@@ -2,7 +2,7 @@
   <Teleport to="body">
     <div class="fixed inset-0 z-[60] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" @mousedown.self="close">
       <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-10 shadow-2xl relative my-auto" role="dialog" aria-modal="true" aria-labelledby="report-title">
-        <button type="button" @click="close" class="modal-close absolute top-4 right-4 !bg-amber-100" aria-label="Close">
+        <button type="button" @click="close" class="modal-close absolute top-4 right-4 !bg-brand-100" aria-label="Close">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
 
@@ -21,7 +21,7 @@
           <h3 id="report-title" class="text-2xl font-bold text-slate-900 mb-1"><i class="fa-solid fa-flag text-rose-500 mr-2"></i>Report a problem</h3>
           <p class="text-sm text-slate-500 mb-4">Tell us what is wrong. Your report is sent to our moderators.</p>
 
-          <p class="text-sm text-slate-700 bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5 mb-5">
+          <p class="text-sm text-slate-700 bg-brand-50 border border-brand-100 rounded-xl px-4 py-2.5 mb-5">
             <span class="font-semibold">{{ target.kind }}:</span> {{ target.label }}
           </p>
 
@@ -36,7 +36,7 @@
                 class="report-choice flex items-start gap-3"
                 :class="[{ 'report-choice-active': reason === r.value }, r.value === 'other' ? 'sm:col-span-2' : '']"
               >
-                <input type="radio" class="mt-1 accent-orange-600" name="report-reason" :value="r.value" v-model="reason">
+                <input type="radio" class="mt-1 accent-brand-600" name="report-reason" :value="r.value" v-model="reason">
                 <span>
                   <span class="block text-sm font-bold text-slate-800">{{ r.label }}</span>
                   <span class="block text-xs text-slate-500">{{ r.hint }}</span>
@@ -117,12 +117,12 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 .report-choice {
   display: block;
   cursor: pointer;
-  border: 1px solid #fed7aa;
+  border: 1px solid #b4c8ea;
   border-radius: 0.75rem;
   padding: 0.7rem 0.9rem;
   background: #fff;
   transition: border-color 0.15s, background-color 0.15s;
 }
-.report-choice:hover { border-color: #fb923c; }
-.report-choice-active { border-color: #ea580c; background: #fff7ed; }
+.report-choice:hover { border-color: #4f78b8; }
+.report-choice-active { border-color: #163767; background: #eef3fb; }
 </style>

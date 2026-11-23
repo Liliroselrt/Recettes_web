@@ -6,7 +6,7 @@
     </div>
 
     <!-- Logged out -->
-    <div v-if="!isLoggedIn" class="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-amber-200 my-8">
+    <div v-if="!isLoggedIn" class="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-brand-200 my-8">
       <h3 class="text-xl font-bold text-slate-900 mb-2">Log in to see your history</h3>
       <p class="text-slate-500 mb-6">Tap "I cooked this" in a recipe to keep track of what you have made.</p>
       <button type="button" class="btn btn-primary btn-lg" @click="openAuth"><i class="fa-solid fa-user"></i> Log in</button>
@@ -59,8 +59,8 @@
       </div>
 
       <!-- Empty state -->
-      <div v-if="entries.length === 0" class="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-amber-200 my-8">
-        <div class="w-20 h-20 bg-amber-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-3xl mb-4">
+      <div v-if="entries.length === 0" class="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-brand-200 my-8">
+        <div class="w-20 h-20 bg-brand-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-3xl mb-4">
           <i class="fa-solid fa-utensils"></i>
         </div>
         <h3 class="text-xl font-bold text-slate-900 mb-2">Nothing cooked yet</h3>

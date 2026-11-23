@@ -22,7 +22,7 @@
         <template v-else-if="shownPeople.length">
           <p v-if="!query.trim()" class="text-xs font-bold uppercase tracking-wide text-slate-400 px-1 mb-1">Users you may like</p>
           <!-- 5 people are visible, scroll down to see the next ones -->
-          <ul class="people-scroll divide-y divide-orange-50" aria-label="Users">
+          <ul class="people-scroll divide-y divide-brand-50" aria-label="Users">
             <PersonRow v-for="person in shownPeople" :key="person.id" :person="person" :is-following="followingIds.has(person.id)" :busy="busyId === person.id" @toggle="toggle" />
           </ul>
         </template>
@@ -47,7 +47,7 @@
         </select>
       </div>
 
-      <div v-if="!isLoggedIn" class="bg-white rounded-3xl p-10 text-center border-2 border-dashed border-amber-200">
+      <div v-if="!isLoggedIn" class="bg-white rounded-3xl p-10 text-center border-2 border-dashed border-brand-200">
         <p class="text-slate-500 mb-5">Log in to follow users and see them here.</p>
         <button type="button" class="btn btn-primary btn-lg" @click="openAuth"><i class="fa-solid fa-user"></i> Log in</button>
       </div>
@@ -55,13 +55,13 @@
       <div v-else-if="loadError" class="alert-error">
         {{ loadError }} <button type="button" class="underline font-bold ml-2" @click="loadFollowing">Try again</button>
       </div>
-      <div v-else-if="following.length === 0" class="bg-white rounded-3xl p-10 text-center border-2 border-dashed border-amber-200">
-        <div class="w-16 h-16 bg-amber-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-2xl mb-3">
+      <div v-else-if="following.length === 0" class="bg-white rounded-3xl p-10 text-center border-2 border-dashed border-brand-200">
+        <div class="w-16 h-16 bg-brand-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-2xl mb-3">
           <i class="fa-solid fa-user-plus"></i>
         </div>
         <p class="text-slate-500">You do not follow anyone yet. Use the search above, or open a user's profile from any recipe.</p>
       </div>
-      <ul v-else class="panel p-2 divide-y divide-orange-50">
+      <ul v-else class="panel p-2 divide-y divide-brand-50">
         <PersonRow v-for="person in visibleFollowing" :key="person.id" :person="person" :is-following="true" :busy="busyId === person.id" @toggle="toggle" />
         <li v-if="visibleFollowing.length === 0" class="text-sm text-slate-500 text-center py-6">Nobody in your list matches “{{ listFilter.trim() }}”.</li>
       </ul>

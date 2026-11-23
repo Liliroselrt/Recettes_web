@@ -8,16 +8,16 @@
 
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --color-brand-50: #fff7ed;
-  --color-brand-100: #ffedd5;
-  --color-brand-200: #fed7aa;
-  --color-brand-300: #fdba74;
-  --color-brand-400: #fb923c;
-  --color-brand-500: #f97316;
-  --color-brand-600: #ea580c;
-  --color-brand-700: #c2410c;
-  --color-brand-800: #9a3412;
-  --color-brand-900: #7c2d12;
+  --color-brand-50: #eef3fb;
+  --color-brand-100: #d9e4f5;
+  --color-brand-200: #b4c8ea;
+  --color-brand-300: #86a4d6;
+  --color-brand-400: #4f78b8;
+  --color-brand-500: #25508f;
+  --color-brand-600: #163767;
+  --color-brand-700: #112b52;
+  --color-brand-800: #0d2142;
+  --color-brand-900: #091730;
 }
 
 @layer base {
@@ -30,21 +30,21 @@
 @layer components {
 /* ---------- 1. Variables (same values as js/tailwind-config.js) ---------- */
 :root {
-    --brand-50: #fff7ed;
-    --brand-100: #ffedd5;
-    --brand-200: #fed7aa;
-    --brand-300: #fdba74;
-    --brand-400: #fb923c;
-    --brand-500: #f97316;
-    --brand-600: #ea580c;
-    --brand-700: #c2410c;
-    --brand-800: #9a3412;
-    --brand-900: #7c2d12;
-    --amber-500: #f59e0b;
-    --amber-600: #d97706;
+    --brand-50: #eef3fb;
+    --brand-100: #d9e4f5;
+    --brand-200: #b4c8ea;
+    --brand-300: #86a4d6;
+    --brand-400: #4f78b8;
+    --brand-500: #25508f;
+    --brand-600: #163767;
+    --brand-700: #112b52;
+    --brand-800: #0d2142;
+    --brand-900: #091730;
+    --amber-500: #3b6fb6;
+    --amber-600: #2a5a9e;
     --ink: #1e293b;
     --success: #16a34a;
-    --ring: 0 0 0 3px rgba(249, 115, 22, 0.35);
+    --ring: 0 0 0 3px rgba(37, 80, 143, 0.35);
 }
 
 /* ---------- 2. Base ---------- */
@@ -69,7 +69,7 @@ input[type="checkbox"] { accent-color: var(--brand-500); }
 .nav-tab:hover { color: var(--brand-600); background: rgba(255, 255, 255, 0.7); }
 .nav-tab-active, .nav-tab-active:hover {
     background: #fff; color: var(--brand-600); font-weight: 700;
-    box-shadow: 0 1px 4px rgba(124, 45, 18, 0.18);
+    box-shadow: 0 1px 4px rgba(9, 23, 48, 0.18);
 }
 .mobile-tab {
     display: flex; flex-direction: column; align-items: center; gap: 0.125rem;
@@ -83,7 +83,7 @@ input[type="checkbox"] { accent-color: var(--brand-500); }
 .recipe-card:hover {
     transform: translateY(-4px);
     border-color: var(--brand-300);
-    box-shadow: 0 14px 30px rgba(124, 45, 18, 0.14);
+    box-shadow: 0 14px 30px rgba(9, 23, 48, 0.14);
 }
 
 /* Round favorite button on the card picture */
@@ -112,11 +112,11 @@ input[type="checkbox"] { accent-color: var(--brand-500); }
 .btn-primary {
     color: #fff; border-color: transparent;
     background-image: linear-gradient(135deg, var(--brand-500), var(--amber-500));
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.32);
+    box-shadow: 0 4px 12px rgba(37, 80, 143, 0.32);
 }
 .btn-primary:hover:not(:disabled) {
     background-image: linear-gradient(135deg, var(--brand-600), var(--amber-600));
-    box-shadow: 0 6px 16px rgba(234, 88, 12, 0.4); transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(22, 55, 103, 0.4); transform: translateY(-1px);
 }
 /* Secondary action: white with orange outline (view, edit, cancel, unshare...) */
 .btn-secondary { color: var(--brand-700); background: #fff; border-color: var(--brand-300); }
@@ -148,7 +148,7 @@ input[type="checkbox"] { accent-color: var(--brand-500); }
 .pill:hover { background: var(--brand-50); border-color: var(--brand-400); color: var(--brand-700); }
 .pill-active, .pill-active:hover {
     background: var(--brand-500); border-color: var(--brand-500); color: #fff; font-weight: 700;
-    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+    box-shadow: 0 2px 8px rgba(37, 80, 143, 0.3);
 }
 
 /* Basic ingredients toggles (dashed = not assumed, solid = assumed available) */
@@ -256,7 +256,7 @@ input[type="checkbox"] { accent-color: var(--brand-500); }
 
 .panel {
     background: #fff; border: 1.5px solid var(--brand-100); border-radius: 1.5rem;
-    box-shadow: 0 4px 20px rgba(124, 45, 18, 0.06);
+    box-shadow: 0 4px 20px rgba(9, 23, 48, 0.06);
 }
 
 /* ---------- 9. Image carousel, card comment, image form ---------- */
@@ -328,10 +328,10 @@ input[type="checkbox"] { accent-color: var(--brand-500); }
 /* ---- Reviews ---- */
 .review-summary { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 1rem; }
 .review-summary-score { font-size: 2.5rem; font-weight: 800; line-height: 1; color: var(--brand-700); }
-.review-form { background: #fffbeb; border: 1.5px solid #fde68a; padding: 1rem; border-radius: 1rem; }
-.review-card { display: flex; gap: 0.85rem; padding: 1rem; background: #fff; border: 1.5px solid #fed7aa; border-radius: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-.review-card-mine { background: #fff7ed; border-color: var(--brand-400); }
-.review-avatar { flex: none; width: 2.5rem; height: 2.5rem; border-radius: 9999px; background: #fde68a; border: 2px solid var(--brand-500); color: var(--brand-800); font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.review-form { background: #f3f6fc; border: 1.5px solid #c9d8f0; padding: 1rem; border-radius: 1rem; }
+.review-card { display: flex; gap: 0.85rem; padding: 1rem; background: #fff; border: 1.5px solid #b4c8ea; border-radius: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.review-card-mine { background: #eef3fb; border-color: var(--brand-400); }
+.review-avatar { flex: none; width: 2.5rem; height: 2.5rem; border-radius: 9999px; background: #c9d8f0; border: 2px solid var(--brand-500); color: var(--brand-800); font-weight: 700; display: flex; align-items: center; justify-content: center; }
 .ing-remove { flex: none; }
 
 /* ---------- 9. Account menu (header) and messages ---------- */
@@ -362,7 +362,7 @@ input[type="checkbox"] { accent-color: var(--brand-500); }
 .bubble-time { float: right; margin: 0.4rem 0 -0.2rem 0.75rem; font-size: 0.625rem; line-height: 1; opacity: 0.65; white-space: nowrap; }
 .bubble-mine { background: var(--brand-500); color: #fff; border-bottom-right-radius: 0.3rem; }
 .bubble-theirs { background: #fff; color: #1e293b; border: 1.5px solid var(--brand-100); border-bottom-left-radius: 0.3rem; }
-.bubble-staff { background: #fffbeb; color: #1e293b; border: 1.5px solid var(--brand-300); border-bottom-left-radius: 0.3rem; }
+.bubble-staff { background: #f3f6fc; color: #1e293b; border: 1.5px solid var(--brand-300); border-bottom-left-radius: 0.3rem; }
 .bubble-deleted { background: transparent; color: #94a3b8; font-style: italic; border: 1.5px dashed #e2e8f0; }
 
 /* Lists of people: exactly 5 rows visible, scroll down for the next ones */

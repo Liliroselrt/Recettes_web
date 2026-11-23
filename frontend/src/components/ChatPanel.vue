@@ -2,7 +2,7 @@
   <div class="grid md:grid-cols-[20rem_1fr] gap-4 h-[calc(100vh-18rem)] min-h-[36rem]">
     <!-- ================= Left: people, conversations ================= -->
     <section class="panel overflow-y-auto" :class="rightOpen ? 'hidden md:block' : 'block'" aria-label="People and conversations">
-      <div class="p-3 border-b border-orange-100">
+      <div class="p-3 border-b border-brand-100">
         <div class="relative">
           <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
           <input v-model="people.query.value" type="search" maxlength="50" class="field field-sm pl-9" placeholder="Search a user..." aria-label="Search for a user to message">
@@ -17,7 +17,7 @@
         <p v-else-if="!people.list.value.length" class="text-sm text-slate-500 py-2">{{ people.query.value.trim() ? `No user found for “${people.query.value.trim()}”.` : 'Nobody to show yet. Follow users from the Community page.' }}</p>
         <ul v-else class="people-scroll-compact" aria-label="People">
           <li v-for="p in people.list.value" :key="p.id">
-            <button type="button" class="w-full h-full flex items-center gap-3 rounded-xl px-2 text-left hover:bg-orange-50" @click="openFromPeople(p.id)">
+            <button type="button" class="w-full h-full flex items-center gap-3 rounded-xl px-2 text-left hover:bg-brand-50" @click="openFromPeople(p.id)">
               <UserAvatar :name="p.username" :src="p.avatarUrl" size="sm" />
               <span class="min-w-0 flex-1 font-bold text-slate-900 truncate">{{ p.username }}</span>
               <span v-if="isFollowed(p)" class="tag !ml-0 tag-warn shrink-0">Following</span>
@@ -27,7 +27,7 @@
       </div>
 
       <!-- Conversations -->
-      <div class="px-3 pt-2 pb-3 border-t border-orange-100">
+      <div class="px-3 pt-2 pb-3 border-t border-brand-100">
         <div class="flex items-center justify-between mb-1">
           <p class="text-xs font-bold uppercase tracking-wide text-slate-400">Conversations</p>
           <button v-if="!isRestricted" type="button" class="btn btn-secondary btn-sm" @click="startGroup"><i class="fa-solid fa-users"></i> New group</button>
@@ -38,9 +38,9 @@
         <p v-else-if="!threads.length" class="text-sm text-slate-500 py-3">No conversation yet. Pick a user above, or create a group.</p>
         <ul v-else>
           <li v-for="t in threads" :key="threadKey(t)">
-            <button type="button" class="w-full flex items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors" :class="isActive(t) ? 'bg-orange-50' : 'hover:bg-orange-50/60'" :aria-current="isActive(t)" @click="openThread(t)">
+            <button type="button" class="w-full flex items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors" :class="isActive(t) ? 'bg-brand-50' : 'hover:bg-brand-50/60'" :aria-current="isActive(t)" @click="openThread(t)">
               <UserAvatar v-if="t.kind === 'direct'" :name="t.username" :src="t.avatarUrl" size="md" />
-              <span v-else class="w-10 h-10 flex-none rounded-full bg-amber-200 text-brand-700 flex items-center justify-center" aria-hidden="true"><i class="fa-solid fa-users"></i></span>
+              <span v-else class="w-10 h-10 flex-none rounded-full bg-brand-200 text-brand-700 flex items-center justify-center" aria-hidden="true"><i class="fa-solid fa-users"></i></span>
               <span class="min-w-0 flex-1">
                 <span class="flex items-center justify-between gap-2">
                   <span class="font-bold text-slate-900 truncate">{{ t.kind === 'group' ? t.name : t.username }}</span>
@@ -62,7 +62,7 @@
     <!-- ================= Right: new group / one conversation ================= -->
     <section class="panel flex-col overflow-hidden" :class="rightOpen ? 'flex' : 'hidden md:flex'" aria-label="Conversation">
       <div v-if="!rightOpen" class="m-auto text-center p-8">
-        <div class="w-16 h-16 bg-amber-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-2xl mb-3"><i class="fa-regular fa-message"></i></div>
+        <div class="w-16 h-16 bg-brand-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-2xl mb-3"><i class="fa-regular fa-message"></i></div>
         <p class="text-slate-500 text-sm">Select a conversation, or search for a user to start one.</p>
       </div>
 
@@ -88,9 +88,9 @@
           <input v-model="groupPeople.query.value" type="search" maxlength="50" class="field field-sm pl-9" placeholder="Search a user to add..." aria-label="Search a user to add to the group">
         </div>
         <p v-if="!groupPeople.list.value.length && !groupPeople.loading.value" class="text-sm text-slate-500 py-2">No user to show.</p>
-        <ul v-else class="people-scroll-compact border border-orange-100 rounded-2xl p-1 mb-5" aria-label="People to add">
+        <ul v-else class="people-scroll-compact border border-brand-100 rounded-2xl p-1 mb-5" aria-label="People to add">
           <li v-for="p in groupPeople.list.value" :key="p.id">
-            <button type="button" class="w-full h-full flex items-center gap-3 rounded-xl px-2 text-left hover:bg-orange-50" :aria-pressed="isPicked(p)" @click="togglePick(p)">
+            <button type="button" class="w-full h-full flex items-center gap-3 rounded-xl px-2 text-left hover:bg-brand-50" :aria-pressed="isPicked(p)" @click="togglePick(p)">
               <UserAvatar :name="p.username" :src="p.avatarUrl" size="sm" />
               <span class="min-w-0 flex-1 font-bold text-slate-900 truncate">{{ p.username }}</span>
               <span v-if="isFollowed(p)" class="tag !ml-0 shrink-0">Following</span>
@@ -106,7 +106,7 @@
 
       <!-- ---------- One conversation ---------- -->
       <template v-else>
-        <header class="flex items-center gap-3 p-3 border-b border-orange-100">
+        <header class="flex items-center gap-3 p-3 border-b border-brand-100">
           <button type="button" class="btn btn-secondary btn-icon md:hidden" aria-label="Back to conversations" @click="closeActive"><i class="fa-solid fa-arrow-left"></i></button>
 
           <!-- Direct -->
@@ -126,7 +126,7 @@
 
           <!-- Group -->
           <template v-else-if="data && data.kind === 'group'">
-            <span class="w-10 h-10 flex-none rounded-full bg-amber-200 text-brand-700 flex items-center justify-center" aria-hidden="true"><i class="fa-solid fa-users"></i></span>
+            <span class="w-10 h-10 flex-none rounded-full bg-brand-200 text-brand-700 flex items-center justify-center" aria-hidden="true"><i class="fa-solid fa-users"></i></span>
             <span class="min-w-0 flex-1">
               <span class="block font-bold text-slate-900 truncate">{{ data.room.name }}</span>
               <span class="block text-xs text-slate-500">{{ data.members.length }} members</span>
@@ -141,7 +141,7 @@
         </header>
 
         <!-- Group members panel -->
-        <div v-if="data && data.kind === 'group' && showMembers" class="border-b border-orange-100 bg-white p-3 max-h-[55%] overflow-y-auto">
+        <div v-if="data && data.kind === 'group' && showMembers" class="border-b border-brand-100 bg-white p-3 max-h-[55%] overflow-y-auto">
           <form v-if="data.room.isOwner" class="flex gap-2 mb-3" @submit.prevent="rename">
             <label class="sr-only" for="group-rename">Group name</label>
             <input id="group-rename" v-model="renameDraft" type="text" maxlength="60" class="field field-sm">
@@ -181,7 +181,7 @@
         </div>
 
         <!-- Messages -->
-        <div ref="scroller" class="flex-1 overflow-y-auto bg-amber-50/40 p-4 space-y-2" aria-live="polite">
+        <div ref="scroller" class="flex-1 overflow-y-auto bg-brand-50/40 p-4 space-y-2" aria-live="polite">
           <p v-if="threadError" class="alert-error" role="alert">{{ threadError }}</p>
           <p v-else-if="data && !messages.length" class="text-center text-sm text-slate-500 py-10">
             {{ data.kind === 'group' ? 'No message yet. Start the conversation!' : `No message yet. Say hello to ${data.user.username}!` }}
@@ -199,7 +199,7 @@
         </div>
 
         <!-- Composer -->
-        <footer class="border-t border-orange-100 p-3">
+        <footer class="border-t border-brand-100 p-3">
           <p v-if="sendError" class="alert-error mb-2" role="alert">{{ sendError }}</p>
 
           <div v-if="isRestricted" class="notice notice-warn !mb-0">

@@ -2,7 +2,7 @@
   <!-- Create / Edit Recipe window -->
   <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 shadow-2xl relative" role="dialog" aria-modal="true" aria-labelledby="form-title">
-      <button @click="closeForm" class="modal-close absolute top-4 right-4 !bg-amber-100" aria-label="Close">
+      <button @click="closeForm" class="modal-close absolute top-4 right-4 !bg-brand-100" aria-label="Close">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
@@ -100,7 +100,7 @@
           <textarea id="rf-steps" v-model="form.instructions" required rows="4" placeholder="Preheat the oven to 180°C&#10;Mix the flour and the eggs&#10;Bake for 30 minutes" class="field"></textarea>
         </div>
 
-        <div class="flex justify-end gap-3 pt-4 border-t border-orange-100">
+        <div class="flex justify-end gap-3 pt-4 border-t border-brand-100">
           <button type="button" @click="closeForm" class="btn btn-secondary btn-lg">Cancel</button>
           <button type="submit" :disabled="saving" class="btn btn-primary btn-lg">
             <i :class="saving ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-floppy-disk'"></i> {{ saving ? 'Saving...' : 'Save' }}

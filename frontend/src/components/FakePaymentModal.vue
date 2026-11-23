@@ -2,7 +2,7 @@
   <!-- Fenêtre de paiement FACTICE (projet local) : aucune donnée de carte n'est envoyée ni enregistrée -->
   <div class="fixed inset-0 z-[60] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" @mousedown.self="close">
     <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl relative" role="dialog" aria-modal="true" aria-labelledby="pay-title">
-      <button type="button" @click="close" class="modal-close absolute top-4 right-4 !bg-amber-100" aria-label="Close">
+      <button type="button" @click="close" class="modal-close absolute top-4 right-4 !bg-brand-100" aria-label="Close">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
       <h3 id="pay-title" class="text-2xl font-bold text-slate-900 mb-1">Subscribe to {{ PLAN.name }}</h3>

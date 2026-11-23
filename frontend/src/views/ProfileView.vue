@@ -77,7 +77,7 @@
         </div>
 
         <!-- Followers / following list -->
-        <div v-if="openList" class="mt-6 pt-5 border-t border-orange-100">
+        <div v-if="openList" class="mt-6 pt-5 border-t border-brand-100">
           <h2 class="field-label">{{ openList === 'followers' ? 'Followers' : 'Following' }}</h2>
           <p v-if="listLoading" class="text-sm text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading...</p>
           <p v-else-if="listError" class="text-sm text-rose-600" role="alert">{{ listError }}</p>
@@ -86,7 +86,7 @@
           </p>
           <ul v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             <li v-for="person in listUsers" :key="person.id">
-              <RouterLink :to="`/users/${person.id}`" class="flex items-center gap-3 rounded-2xl px-3 py-2 hover:bg-orange-50 transition-colors">
+              <RouterLink :to="`/users/${person.id}`" class="flex items-center gap-3 rounded-2xl px-3 py-2 hover:bg-brand-50 transition-colors">
                 <UserAvatar :name="person.username" :src="person.avatarUrl" size="sm" />
                 <span class="font-semibold text-slate-800 truncate">{{ person.username }}</span>
               </RouterLink>
@@ -111,8 +111,8 @@
       <div v-else-if="chefRecipes.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         <RecipeCard v-for="recipe in chefRecipes" :key="recipe.id" :recipe="recipe" @open="openRecipeDetail" />
       </div>
-      <div v-else class="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-amber-200 my-8">
-        <div class="w-20 h-20 bg-amber-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-3xl mb-4">
+      <div v-else class="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-brand-200 my-8">
+        <div class="w-20 h-20 bg-brand-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-3xl mb-4">
           <i class="fa-solid fa-cookie-bite"></i>
         </div>
         <h3 class="text-xl font-bold text-slate-900 mb-2">No published recipe yet</h3>
@@ -268,10 +268,10 @@ watch(token, loadProfile)
 </script>
 
 <style scoped>
-.stat-box { display: flex; flex-direction: column; align-items: center; min-width: 5.5rem; padding: 0.6rem 1rem; border-radius: 1rem; background: #fff7ed; border: 1.5px solid #ffedd5; }
-.stat-number { font-size: 1.25rem; font-weight: 800; color: #7c2d12; line-height: 1.2; }
+.stat-box { display: flex; flex-direction: column; align-items: center; min-width: 5.5rem; padding: 0.6rem 1rem; border-radius: 1rem; background: #dff0ff; border: 1.5px solid #b8e1ff; }
+.stat-number { font-size: 1.25rem; font-weight: 800; color: #064d89; line-height: 1.2; }
 .stat-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #78716c; }
 .stat-button { cursor: pointer; transition: border-color 0.15s, background 0.15s; }
-.stat-button:hover { border-color: #fb923c; }
-.stat-active { border-color: #f97316; background: #ffedd5; }
+.stat-button:hover { border-color: #0c93f0; }
+.stat-active { border-color: #064d89; background: #b8e1ff; }
 </style>

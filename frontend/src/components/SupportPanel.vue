@@ -23,19 +23,19 @@
     <div class="grid md:grid-cols-[19rem_1fr] gap-4 h-[calc(100vh-20rem)] min-h-[30rem]">
       <!-- Left: requests -->
       <section class="panel flex-col overflow-hidden" :class="(activeId || creating) ? 'hidden md:flex' : 'flex'" aria-label="Requests">
-        <div v-if="mode === 'mine'" class="p-3 border-b border-orange-100">
+        <div v-if="mode === 'mine'" class="p-3 border-b border-brand-100">
           <button type="button" class="btn btn-primary btn-sm w-full" @click="startCreate"><i class="fa-solid fa-plus"></i> New request</button>
         </div>
         <div class="flex-1 overflow-y-auto">
           <p v-if="loadingList" class="text-sm text-slate-500 p-4"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading...</p>
           <p v-else-if="listError" class="alert-error m-3" role="alert">{{ listError }}</p>
           <div v-else-if="!tickets.length" class="p-6 text-center">
-            <div class="w-14 h-14 bg-amber-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-xl mb-3"><i class="fa-solid fa-headset"></i></div>
+            <div class="w-14 h-14 bg-brand-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-xl mb-3"><i class="fa-solid fa-headset"></i></div>
             <p class="text-sm text-slate-500">{{ mode !== 'mine' ? 'Nothing here. All caught up!' : 'You have not contacted the staff yet.' }}</p>
           </div>
           <ul v-else class="p-1.5">
             <li v-for="t in tickets" :key="t.id">
-              <button type="button" class="w-full rounded-xl px-3 py-2.5 text-left transition-colors" :class="t.id === activeId ? 'bg-orange-50' : 'hover:bg-orange-50/60'" :aria-current="t.id === activeId" @click="openTicket(t.id)">
+              <button type="button" class="w-full rounded-xl px-3 py-2.5 text-left transition-colors" :class="t.id === activeId ? 'bg-brand-50' : 'hover:bg-brand-50/60'" :aria-current="t.id === activeId" @click="openTicket(t.id)">
                 <span class="flex items-center justify-between gap-2">
                   <span class="font-bold text-slate-900 truncate" :class="t.unread ? '' : 'font-semibold'">{{ t.subject }}</span>
                   <span v-if="t.unread" class="count-badge shrink-0" :aria-label="`${t.unread} new answer`">{{ t.unread }}</span>
@@ -56,7 +56,7 @@
       <section class="panel flex-col overflow-hidden" :class="(activeId || creating) ? 'flex' : 'hidden md:flex'" aria-label="Request details">
         <!-- Nothing selected -->
         <div v-if="!activeId && !creating" class="m-auto text-center p-8 max-w-sm">
-          <div class="w-16 h-16 bg-amber-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-2xl mb-3"><i class="fa-solid fa-life-ring"></i></div>
+          <div class="w-16 h-16 bg-brand-100 text-brand-500 rounded-full flex items-center justify-center mx-auto text-2xl mb-3"><i class="fa-solid fa-life-ring"></i></div>
           <template v-if="mode !== 'mine'"><p class="text-slate-500 text-sm">Select a request to read it and answer.</p></template>
           <template v-else>
             <p class="font-bold text-slate-900 mb-1">Need help from the team?</p>
@@ -86,10 +86,10 @@
             <fieldset v-else>
               <legend class="field-label">Who should read it?</legend>
               <label class="flex items-center gap-2 text-sm text-slate-700 py-1 cursor-pointer">
-                <input v-model="form.adminOnly" type="radio" :value="false" class="accent-orange-600"> Moderators and admins
+                <input v-model="form.adminOnly" type="radio" :value="false" class="accent-brand-600"> Moderators and admins
               </label>
               <label class="flex items-center gap-2 text-sm text-slate-700 py-1 cursor-pointer">
-                <input v-model="form.adminOnly" type="radio" :value="true" class="accent-orange-600"> Admins only
+                <input v-model="form.adminOnly" type="radio" :value="true" class="accent-brand-600"> Admins only
               </label>
             </fieldset>
           </div>
@@ -110,7 +110,7 @@
 
         <!-- One request -->
         <template v-else>
-          <header class="p-3 border-b border-orange-100">
+          <header class="p-3 border-b border-brand-100">
             <div class="flex items-start gap-3">
               <button type="button" class="btn btn-secondary btn-icon md:hidden shrink-0" aria-label="Back to requests" @click="closeTicket"><i class="fa-solid fa-arrow-left"></i></button>
               <div v-if="detail" class="min-w-0 flex-1">
@@ -139,7 +139,7 @@
             </div>
           </header>
 
-          <div ref="scroller" class="flex-1 overflow-y-auto bg-amber-50/40 p-4 space-y-3" aria-live="polite">
+          <div ref="scroller" class="flex-1 overflow-y-auto bg-brand-50/40 p-4 space-y-3" aria-live="polite">
             <p v-if="detailError" class="alert-error" role="alert">{{ detailError }}</p>
             <div v-for="m in detail ? detail.messages : []" :key="m.id" class="flex flex-col min-w-0 max-w-[85%]" :class="isMine(m) ? 'items-end ml-auto' : 'items-start'">
               <span class="text-[11px] text-slate-500 mb-0.5 px-1">
@@ -151,7 +151,7 @@
             </div>
           </div>
 
-          <footer v-if="detail" class="border-t border-orange-100 p-3">
+          <footer v-if="detail" class="border-t border-brand-100 p-3">
             <p v-if="replyError" class="alert-error mb-2" role="alert">{{ replyError }}</p>
             <p v-if="detail.ticket.status === 'closed'" class="notice notice-warn !mb-0"><i class="fa-solid fa-lock"></i> This request is closed.<template v-if="detail.isOwner">&nbsp;Please open a new one if you still need help.</template></p>
             <form v-else class="flex items-end gap-2" @submit.prevent="reply">

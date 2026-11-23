@@ -1,5 +1,5 @@
 <template>
-  <article @click="$emit('open', recipe)" class="recipe-card group bg-white rounded-3xl overflow-hidden border border-orange-100 shadow-sm flex flex-col justify-between">
+  <article @click="$emit('open', recipe)" class="recipe-card group bg-white rounded-3xl overflow-hidden border border-brand-100 shadow-sm flex flex-col justify-between">
     <div>
       <!-- Card picture -->
       <RecipeCarousel :recipe="recipe" height-class="h-48 bg-brand-900" lazy>
@@ -26,7 +26,7 @@
           <span class="flex items-center text-rose-500 font-semibold" title="Favorites">
             <i class="fa-solid fa-heart mr-1"></i> {{ totalFavorites(recipe) }}
           </span>
-          <span class="flex items-center text-amber-500 font-bold" title="Average rating">
+          <span class="flex items-center text-brand-500 font-bold" title="Average rating">
             <i class="fa-solid fa-star mr-1"></i> {{ ratingLabel(recipe) }}<span v-if="recipe.reviews.length" class="ml-1">({{ recipe.reviews.length }})</span>
           </span>
         </div>
@@ -46,7 +46,7 @@
             <p class="text-sm text-slate-600 italic line-clamp-2 leading-relaxed">“{{ latestReview(recipe).comment }}”</p>
             <p class="text-xs text-slate-500 mt-1">
               <strong class="font-semibold text-slate-700">{{ latestReview(recipe).author }}</strong>
-              <span class="text-amber-500 font-bold ml-1.5"><i class="fa-solid fa-star mr-0.5"></i>{{ latestReview(recipe).rating }}/5</span>
+              <span class="text-brand-500 font-bold ml-1.5"><i class="fa-solid fa-star mr-0.5"></i>{{ latestReview(recipe).rating }}/5</span>
             </p>
           </template>
           <p v-else class="text-sm text-slate-400 italic">No reviews yet. Be the first to leave one!</p>
@@ -60,7 +60,7 @@
     </div>
 
     <!-- Card Footer & Actions (every button uses .stop so it does not also open the recipe) -->
-    <div class="px-6 pb-6 pt-4 border-t border-orange-50 flex flex-wrap items-center justify-between gap-3">
+    <div class="px-6 pb-6 pt-4 border-t border-brand-50 flex flex-wrap items-center justify-between gap-3">
       <!-- Click the author to open their profile -->
       <RouterLink :to="`/users/${recipe.userId}`" @click.stop class="group/author flex items-center space-x-2 text-xs text-slate-500" :title="`See the profile of ${recipe.author}`">
         <UserAvatar :name="recipe.author" :src="recipe.authorAvatar" size="xs" />

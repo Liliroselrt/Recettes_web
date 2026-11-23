@@ -1,6 +1,6 @@
 <template>
   <!-- Photo de profil, ou initiale du pseudo si la personne n'en a pas (ou si l'image ne se charge pas) -->
-  <span class="inline-flex flex-none items-center justify-center overflow-hidden rounded-full bg-amber-200 font-bold text-brand-800 select-none" :class="SIZES[size] || SIZES.md" aria-hidden="true">
+  <span class="inline-flex flex-none items-center justify-center overflow-hidden rounded-full bg-brand-200 font-bold text-brand-800 select-none" :class="SIZES[size] || SIZES.md" aria-hidden="true">
     <img v-if="url && !failed" :src="url" alt="" class="w-full h-full object-cover" @error="failed = true">
     <template v-else>{{ initial }}</template>
   </span>

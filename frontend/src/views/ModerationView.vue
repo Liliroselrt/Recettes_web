@@ -79,7 +79,7 @@
             <!-- Decision -->
             <div>
               <!-- Already handled -->
-              <div v-if="r.status !== 'pending'" class="bg-amber-50 border border-amber-100 rounded-xl p-4 text-sm space-y-1.5">
+              <div v-if="r.status !== 'pending'" class="bg-brand-50 border border-brand-100 rounded-xl p-4 text-sm space-y-1.5">
                 <p class="font-semibold text-slate-900">{{ ACTION_LABELS[r.action] || 'Reviewed' }}</p>
                 <p class="text-xs text-slate-500">By {{ r.reviewedBy || 'a moderator' }} on {{ formatDateTime(r.updatedAt) }}</p>
                 <p v-if="r.decisionMessage" class="text-slate-700"><span class="font-semibold">Message shown:</span> {{ r.decisionMessage }}</p>
@@ -91,7 +91,7 @@
                 <p class="field-label">Your decision</p>
                 <div class="space-y-2 mb-4">
                   <label v-for="key in optionsFor(r)" :key="key" class="decision-choice flex items-start gap-3" :class="{ 'decision-choice-active': forms[r.id].decision === key }">
-                    <input type="radio" class="mt-1 accent-orange-600" :name="'decision-' + r.id" :value="key" v-model="forms[r.id].decision">
+                    <input type="radio" class="mt-1 accent-brand-600" :name="'decision-' + r.id" :value="key" v-model="forms[r.id].decision">
                     <span>
                       <span class="block text-sm font-bold text-slate-800">{{ DECISION_OPTIONS[key].label }}</span>
                       <span class="block text-xs text-slate-500">{{ DECISION_OPTIONS[key].help }}</span>
@@ -109,7 +109,7 @@
                 <textarea :id="'note-' + r.id" v-model="forms[r.id].note" rows="2" maxlength="1000" class="field mb-3"></textarea>
 
                 <label v-if="!r.reporter.isStaff && r.reporter.canReport" class="flex items-start gap-2 text-sm text-slate-700 mb-4 cursor-pointer">
-                  <input type="checkbox" class="mt-1 accent-orange-600" v-model="forms[r.id].restrictReporter">
+                  <input type="checkbox" class="mt-1 accent-brand-600" v-model="forms[r.id].restrictReporter">
                   <span>This report is abusive: remove <strong>{{ r.reporter.username }}</strong>'s ability to report</span>
                 </label>
 
@@ -202,12 +202,12 @@ watch(isModerator, (allowed) => { if (allowed) load() }, { immediate: true })
 <style scoped>
 .decision-choice {
   cursor: pointer;
-  border: 1px solid #fed7aa;
+  border: 1px solid #b4c8ea;
   border-radius: 0.75rem;
   padding: 0.6rem 0.8rem;
   background: #fff;
   transition: border-color 0.15s, background-color 0.15s;
 }
-.decision-choice:hover { border-color: #fb923c; }
-.decision-choice-active { border-color: #ea580c; background: #fff7ed; }
+.decision-choice:hover { border-color: #4f78b8; }
+.decision-choice-active { border-color: #163767; background: #eef3fb; }
 </style>

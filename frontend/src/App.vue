@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-amber-50/40 font-sans text-slate-800 min-h-screen flex flex-col">
+  <div class="bg-brand-50/40 font-sans text-slate-800 min-h-screen flex flex-col">
     <Navbar />
     <ViewAsBanner />
 

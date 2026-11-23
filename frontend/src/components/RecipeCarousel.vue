@@ -4,7 +4,7 @@
   <div class="carousel overflow-hidden" :class="[heightClass, { 'carousel-visible': alwaysShowArrows }]">
     <div
       v-if="showPlaceholder(recipe)"
-      class="w-full h-full flex items-center justify-center bg-gradient-to-tr from-amber-500 to-brand-600 text-white/40 text-6xl"
+      class="w-full h-full flex items-center justify-center bg-gradient-to-tr from-brand-500 to-brand-600 text-white/40 text-6xl"
     >
       <i class="fa-solid fa-utensils"></i>
     </div>

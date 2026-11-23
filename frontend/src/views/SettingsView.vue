@@ -6,7 +6,7 @@
     </div>
 
     <!-- Logged out -->
-    <div v-if="!isLoggedIn" class="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-amber-200">
+    <div v-if="!isLoggedIn" class="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-brand-200">
       <h3 class="text-xl font-bold text-slate-900 mb-2">Log in to edit your profile</h3>
       <p class="text-slate-500 mb-6">Your profile picture and bio are linked to your account.</p>
       <button type="button" class="btn btn-primary btn-lg" @click="openAuth"><i class="fa-solid fa-user"></i> Log in</button>

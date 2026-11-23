@@ -52,7 +52,7 @@
               · {{ formatDate(r.createdAt) }}
             </p>
 
-            <div v-if="r.status !== 'pending'" class="mt-3 bg-amber-50 border border-amber-100 rounded-xl p-3 text-sm">
+            <div v-if="r.status !== 'pending'" class="mt-3 bg-brand-50 border border-brand-100 rounded-xl p-3 text-sm">
               <p class="font-semibold text-slate-800">
                 Decision: {{ ACTION_LABELS[r.action] || 'Reviewed' }}
                 <span class="font-normal text-slate-500">on {{ formatDate(r.updatedAt) }}</span>

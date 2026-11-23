@@ -1,20 +1,20 @@
 <template>
-  <header class="sticky top-0 z-40 glass-header border-b border-orange-100 shadow-sm">
+  <header class="sticky top-0 z-40 glass-header border-b border-brand-100 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16 sm:h-20 items-center gap-3">
         <!-- Logo (the whole block is one link back to the home tab) -->
-        <RouterLink to="/" class="flex items-center space-x-3 text-left rounded-2xl p-1 -m-1 hover:bg-orange-50 transition-colors shrink-0" aria-label="GourmetCraft, go to the home page">
-          <span class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-brand-500 to-amber-400 rounded-2xl flex items-center justify-center text-white text-lg sm:text-xl shadow-lg shadow-orange-500/30">
+        <RouterLink to="/" class="flex items-center space-x-3 text-left rounded-2xl p-1 -m-1 hover:bg-brand-50 transition-colors shrink-0" aria-label="GourmetCraft, go to the home page">
+          <span class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-brand-500 to-brand-400 rounded-2xl flex items-center justify-center text-white text-lg sm:text-xl shadow-lg shadow-brand-500/30">
             <i class="fa-solid fa-utensils"></i>
           </span>
           <span class="hidden min-[430px]:block">
-            <span class="block text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-brand-700 via-brand-600 to-amber-600 bg-clip-text text-transparent">Ef'Recipe</span>
-            <span class="hidden sm:block text-xs font-semibold tracking-wider text-amber-700 uppercase">Community Cookbook</span>
+            <span class="block text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-brand-700 via-brand-600 to-brand-600 bg-clip-text text-transparent">Ef'Recipe</span>
+            <span class="hidden sm:block text-xs font-semibold tracking-wider text-brand-700 uppercase">Community Cookbook</span>
           </span>
         </RouterLink>
 
         <!-- Desktop Nav Links (icons only on medium screens, with text from lg) -->
-        <nav class="hidden md:flex items-center space-x-1 bg-amber-100/60 p-1.5 rounded-2xl border border-amber-200/60" aria-label="Main navigation">
+        <nav class="hidden md:flex items-center space-x-1 bg-brand-100/60 p-1.5 rounded-2xl border border-brand-200/60" aria-label="Main navigation">
           <RouterLink to="/" :class="navBtnStyle('home')" title="Home">
             <i class="fa-solid fa-house text-sm"></i>
             <span class="hidden lg:inline">Home</span>
@@ -62,7 +62,7 @@
                 <i class="fa-solid fa-gear"></i>
               </button>
 
-              <div v-if="menuOpen" class="absolute right-0 mt-2 w-72 max-w-[92vw] max-h-[80vh] overflow-y-auto bg-white rounded-2xl shadow-xl border border-orange-100 z-50 p-2" role="menu" aria-label="Account menu">
+              <div v-if="menuOpen" class="absolute right-0 mt-2 w-72 max-w-[92vw] max-h-[80vh] overflow-y-auto bg-white rounded-2xl shadow-xl border border-brand-100 z-50 p-2" role="menu" aria-label="Account menu">
                 <!-- Who am I -->
                 <div class="flex items-center gap-3 px-3 py-2.5">
                   <UserAvatar :name="username" :src="profile && profile.avatarUrl" size="md" />
@@ -77,14 +77,14 @@
                 <!-- The create button is hidden on small screens, so it lives here too -->
                 <button type="button" class="menu-item sm:hidden" role="menuitem" @click="createFromMenu"><i class="fa-solid fa-plus"></i> Create a recipe</button>
 
-                <div class="my-1.5 border-t border-orange-100"></div>
+                <div class="my-1.5 border-t border-brand-100"></div>
                 <RouterLink to="/settings" class="menu-item" role="menuitem"><i class="fa-solid fa-user-pen"></i> Profile settings</RouterLink>
                 <RouterLink to="/history" class="menu-item" role="menuitem"><i class="fa-solid fa-clock-rotate-left"></i> Cooking history</RouterLink>
                 <RouterLink to="/my-reports" class="menu-item" role="menuitem"><i class="fa-regular fa-flag"></i> Reports about me</RouterLink>
 
                 <!-- Staff tools -->
                 <template v-if="isModerator">
-                  <div class="my-1.5 border-t border-orange-100"></div>
+                  <div class="my-1.5 border-t border-brand-100"></div>
                   <p class="menu-label">{{ isAdmin ? 'Administration' : 'Moderation' }}</p>
                   <RouterLink to="/moderation" class="menu-item" role="menuitem"><i class="fa-solid fa-shield-halved"></i> Moderation</RouterLink>
                   <RouterLink v-if="isAdmin" to="/admin" class="menu-item" role="menuitem"><i class="fa-solid fa-user-shield"></i> Admin panel</RouterLink>
@@ -92,7 +92,7 @@
 
                 <!-- "View the site as" (real admins only) -->
                 <template v-if="isRealAdmin">
-                  <div class="my-1.5 border-t border-orange-100"></div>
+                  <div class="my-1.5 border-t border-brand-100"></div>
                   <details class="group" :open="viewMode !== ''">
                     <summary class="menu-item cursor-pointer list-none">
                       <i class="fa-solid fa-eye"></i>
@@ -101,8 +101,8 @@
                       <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform group-open:rotate-180"></i>
                     </summary>
                     <p class="text-xs text-slate-500 px-3 pb-2">Test the site with another type of account. Your real role does not change.</p>
-                    <label v-for="m in VIEW_MODES" :key="m.value" class="flex items-start gap-3 rounded-xl px-3 py-2 cursor-pointer hover:bg-orange-50">
-                      <input type="radio" class="mt-1 accent-orange-600" name="view-as" :checked="viewMode === m.value" @change="changeView(m.value)">
+                    <label v-for="m in VIEW_MODES" :key="m.value" class="flex items-start gap-3 rounded-xl px-3 py-2 cursor-pointer hover:bg-brand-50">
+                      <input type="radio" class="mt-1 accent-brand-600" name="view-as" :checked="viewMode === m.value" @change="changeView(m.value)">
                       <span>
                         <span class="block text-sm font-bold text-slate-800">{{ m.label }}</span>
                         <span class="block text-xs text-slate-500">{{ m.help }}</span>
@@ -111,7 +111,7 @@
                   </details>
                 </template>
 
-                <div class="my-1.5 border-t border-orange-100"></div>
+                <div class="my-1.5 border-t border-brand-100"></div>
                 <button type="button" class="menu-item menu-item-danger" role="menuitem" @click="logout"><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
               </div>
             </div>
@@ -132,7 +132,7 @@
     </div>
 
     <!-- Mobile Navigation Bar -->
-    <div class="md:hidden flex justify-around border-t border-orange-100 py-2.5 bg-white/90">
+    <div class="md:hidden flex justify-around border-t border-brand-100 py-2.5 bg-white/90">
       <RouterLink to="/" :class="mobileNavStyle('home')">
         <i class="fa-solid fa-house text-lg"></i>
         <span class="text-xs">Home</span>

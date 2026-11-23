@@ -2,7 +2,7 @@
   <!-- Auth window (Log in / Sign up) -->
   <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl relative" role="dialog" aria-modal="true" aria-labelledby="auth-title">
-      <button @click="closeAuth" class="modal-close absolute top-4 right-4 !bg-amber-100" aria-label="Close">
+      <button @click="closeAuth" class="modal-close absolute top-4 right-4 !bg-brand-100" aria-label="Close">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
       <h3 id="auth-title" class="text-2xl font-bold text-slate-900 mb-2">{{ signup ? 'Create your account' : 'Welcome!' }}</h3>
