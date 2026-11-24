@@ -256,5 +256,7 @@ A picture imported from your computer is saved in `backend/img/` and only its pa
 ---
 
 ## 👥 Authors
+Raphaël Perricaud - Cyprien Donné - Lily-rose Lauret
+
 
 **Project framework:** Web Programming Project – EFREI
