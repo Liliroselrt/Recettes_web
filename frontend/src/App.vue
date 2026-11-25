@@ -13,7 +13,6 @@
       </div>
     </footer>
 
-    <!-- Windows opened from anywhere (navbar, cards, empty states) -->
     <RecipeFormModal v-if="showFormModal" />
     <AuthModal v-if="showAuthModal" />
   </div>
