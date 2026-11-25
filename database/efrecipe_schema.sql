@@ -24,6 +24,17 @@
 --   * Reviews           : contrainte UNIQUE (recipeId, userId) = une seule review par
 --                         personne et par recette (l'avis existant est modifié).
 --
+-- NOUVEAUTÉS PUBLICITÉS / ACHATS (repérées par « [NEW] » dans le script, section 5) :
+--   * Ads               : publicités (lien + image URL) de 2 formats : 'vertical'
+--                         (colonnes latérales de la page) et 'inline' (encadrés qui
+--                         apparaissent quand on défile vers le bas).
+--   * FileDownloads     : téléchargements de fichiers de recette (facturés à l'unité).
+--   * CartItems         : articles dans le panier (vidéo ou fichier, pas encore payés).
+--   * Payments.paymentType : nouvelle valeur 'file_download' (en plus de subscription,
+--                         video_unlock, recipe_request).
+--   Tarifs (en ZAR) : abonnement Gourmet Plus 30,00 / mois ; déblocage d'une vidéo 5,00
+--   à l'unité ; téléchargement d'un fichier 5,00 à l'unité.
+--
 -- CONVENTIONS DE DONNÉES (lues par le backend, voir backend/utils/ingredients.js) :
 --   * Recipes.ingredients : une ligne par ingrédient, ex. « 150 g sugar »,
 --                           « 6 apples », « Black pepper (to taste) ».
@@ -243,8 +254,8 @@ CREATE TABLE IF NOT EXISTS `Payments` (
   `userId`      INT                                                    NOT NULL,
   `amount`      DECIMAL(10,2)                                          NOT NULL,
   `currency`    VARCHAR(10)                                            NOT NULL DEFAULT 'ZAR',
-  `paymentType` ENUM('subscription', 'video_unlock', 'recipe_request') NOT NULL,
-  `referenceId` INT                                                    DEFAULT NULL, -- ID de l'abonnement, de la recette ou de la demande
+  `paymentType` ENUM('subscription', 'video_unlock', 'recipe_request', 'file_download') NOT NULL, -- [NEW] + file_download
+  `referenceId` INT                                                    DEFAULT NULL, -- ID de l'abonnement (subscription), de la recette (video_unlock, file_download) ou de la demande (recipe_request)
   `status`      ENUM('pending', 'succeeded', 'failed', 'refunded')     NOT NULL DEFAULT 'succeeded',
   `createdAt`   DATETIME                                               NOT NULL,
   PRIMARY KEY (`id`),
@@ -436,3 +447,80 @@ ALTER TABLE `ModTicketMessages`
   ADD CONSTRAINT `ModTicketMessages_fk_ticket` FOREIGN KEY (`ticketId`) REFERENCES `ModContactTickets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ModTicketMessages`
   ADD CONSTRAINT `ModTicketMessages_fk_sender` FOREIGN KEY (`senderId`) REFERENCES `Users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- --------------------------------------------------------------------------
+-- 5. [NEW] Publicités, téléchargements payants & panier
+-- --------------------------------------------------------------------------
+
+-- [NEW] Publicités (liens + images). Deux formats d'affichage :
+--   'vertical' = bannière haute et étroite posée sur les côtés de la page (ex. 160x600)
+--   'inline'   = encadré « normal » inséré dans le contenu quand on défile (ex. 728x180)
+-- `side` ne sert qu'aux publicités verticales (left / right / any = au choix du front).
+-- Le front n'affiche que les lignes isActive = TRUE dont la période (startDate / endDate)
+-- couvre la date du jour, triées par priority décroissante.
+CREATE TABLE IF NOT EXISTS `Ads` (
+  `id`          INT                                                                         NOT NULL AUTO_INCREMENT,
+  `title`       VARCHAR(150)                                                                NOT NULL,
+  `advertiser`  VARCHAR(100)                                                                NOT NULL,
+  `category`    ENUM('equipment', 'supermarket', 'delivery', 'restaurant', 'meal_kit', 'other') NOT NULL DEFAULT 'other',
+  `format`      ENUM('vertical', 'inline')                                                  NOT NULL,
+  `side`        ENUM('left', 'right', 'any')                                                NOT NULL DEFAULT 'any',
+  `imageUrl`    TEXT                                                                        NOT NULL,
+  `linkUrl`     TEXT                                                                        NOT NULL,
+  `altText`     VARCHAR(255)                                                                DEFAULT NULL,
+  `width`       INT                                                                         DEFAULT NULL, -- largeur de l'image en px
+  `height`      INT                                                                         DEFAULT NULL, -- hauteur de l'image en px
+  `priority`    INT                                                                         NOT NULL DEFAULT 0,
+  `isActive`    BOOLEAN                                                                     NOT NULL DEFAULT TRUE,
+  `startDate`   DATETIME                                                                    NOT NULL,
+  `endDate`     DATETIME                                                                    DEFAULT NULL, -- NULL = sans fin
+  `impressions` INT                                                                         NOT NULL DEFAULT 0,
+  `clicks`      INT                                                                         NOT NULL DEFAULT 0,
+  `createdBy`   INT                                                                         DEFAULT NULL,
+  `createdAt`   DATETIME                                                                    NOT NULL,
+  `updatedAt`   DATETIME                                                                    NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `Ads_format_active` (`format`, `isActive`),
+  KEY `createdBy` (`createdBy`),
+  CONSTRAINT `Ads_ibfk_1` FOREIGN KEY (`createdBy`) REFERENCES `Users` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- [NEW] Téléchargements de fichiers de recette, facturés à l'unité (5,00 ZAR).
+-- Chaque ligne correspond à un paiement `Payments` de type 'file_download'
+-- (Payments.referenceId = recipeId).
+CREATE TABLE IF NOT EXISTS `FileDownloads` (
+  `id`           INT           NOT NULL AUTO_INCREMENT,
+  `userId`       INT           NOT NULL,
+  `recipeId`     INT           DEFAULT NULL,
+  `fileName`     VARCHAR(255)  NOT NULL,
+  `fileFormat`   VARCHAR(10)   NOT NULL DEFAULT 'pdf',
+  `amountPaid`   DECIMAL(10,2) NOT NULL DEFAULT 5.00,
+  `downloadedAt` DATETIME      NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `userId` (`userId`),
+  KEY `recipeId` (`recipeId`),
+  CONSTRAINT `FileDownloads_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `Users` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FileDownloads_ibfk_2` FOREIGN KEY (`recipeId`) REFERENCES `Recipes` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- [NEW] Panier : articles ajoutés mais pas encore payés (vidéo à débloquer ou fichier à télécharger).
+-- Au paiement, la ligne est supprimée et remplacée par un VideoUnlocks / FileDownloads + un Payments.
+CREATE TABLE IF NOT EXISTS `CartItems` (
+  `id`         INT                                  NOT NULL AUTO_INCREMENT,
+  `userId`     INT                                  NOT NULL,
+  `recipeId`   INT                                  NOT NULL,
+  `itemType`   ENUM('video_unlock', 'file_download') NOT NULL,
+  `fileFormat` VARCHAR(10)                          DEFAULT NULL, -- uniquement pour file_download
+  `price`      DECIMAL(10,2)                        NOT NULL DEFAULT 5.00,
+  `addedAt`    DATETIME                             NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `userId` (`userId`),
+  KEY `recipeId` (`recipeId`),
+  CONSTRAINT `CartItems_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `Users` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `CartItems_ibfk_2` FOREIGN KEY (`recipeId`) REFERENCES `Recipes` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
