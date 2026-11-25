@@ -5,7 +5,7 @@
 **Stack:** Vue 3 + Vite + Tailwind CSS 4 (frontend) · Express + Sequelize (backend) · MySQL 8 (database)
 
 > 💡 **How to read this page:** every grey box is something to **type or paste**.
-> 💻 = a terminal command · 📄 = the content of a file · 🤖 = a message for an AI
+> 💻 = a terminal command · 📄 = the content of a file
 
 ---
 
@@ -114,21 +114,14 @@ Use this to turn what is currently in your database (new recipes, accounts, revi
 4. Choose **Export to Self-Contained File** and set the file to `database/efrecipe_data_raw.sql`.
 5. Click **Start Export**.
 
-**Step 2 — Clean it with an AI.** Open an AI chat, attach `efrecipe_data_raw.sql` **and** `efrecipe_schema.sql`, and send:
+**Step 2 — Clean the dump.** Open `efrecipe_data_raw.sql` in VS Code and apply these rules to turn it into a clean `efrecipe_data.sql`:
 
-> 🤖 **MESSAGE FOR THE AI**
-> ```text
-> Here is a raw MySQL Workbench "Dump Data Only" file of my database `projet_web`,
-> and my schema file. Turn the dump into a clean file named `efrecipe_data.sql`
-> by following these rules:
-> 1. Start the file with SET FOREIGN_KEY_CHECKS = 0; and end it with SET FOREIGN_KEY_CHECKS = 1;
-> 2. Delete everything that is not an INSERT.
-> 3. Keep every INSERT INTO and all its values exactly as they are
->    (accents, \n, NULL, dates, password hashes).
-> 4. Keep the table names with the exact same upper/lower case as in the schema file.
-> ```
+1. Add `SET FOREIGN_KEY_CHECKS = 0;` as the very first line and `SET FOREIGN_KEY_CHECKS = 1;` as the very last line.
+2. Delete everything that is not an `INSERT` (comments, `LOCK TABLES`, `UNLOCK TABLES`, `/*!40000 ... */` lines, etc.).
+3. Keep every `INSERT INTO` and all its values exactly as they are (accents, `\n`, `NULL`, dates, password hashes).
+4. Make sure the table names have the exact same upper/lower case as in `efrecipe_schema.sql` (e.g. `Recipes`, not `recipes`).
 
-**Step 3 — Replace the file.** Paste the AI's answer into `database/efrecipe_data.sql` (replace everything), then delete `efrecipe_data_raw.sql`.
+**Step 3 — Replace the file.** Save the cleaned content as `database/efrecipe_data.sql` (replace everything), then delete `efrecipe_data_raw.sql`.
 
 **Step 4 — Test it.** Run the two SQL files again (section *Create the database*) and check that your recipes are there.
 
