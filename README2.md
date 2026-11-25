@@ -1,4 +1,4 @@
-# 🍳 GourmetCraft – Community Cookbook
+# 🍳 Ef'Recipe – Community Cookbook
 
 A recipe-sharing website: browse, rate, favorite and share recipes, and use **My Pantry** to see which recipes you can cook with the ingredients you have.
 
@@ -54,7 +54,7 @@ Right-click the **`backend`** folder → **New File** → name it exactly `.env`
 > DB_USER=root
 > DB_PASSWORD=YOUR_MYSQL_PASSWORD
 > DB_NAME=projet_web
-> JWT_SECRET=gourmetcraft_secret_key_2026
+> JWT_SECRET=efrecipe_secret_key_2026
 > PORT=3000
 > ```
 
@@ -64,8 +64,8 @@ After changing `.env`, restart the backend: `Ctrl + C` in Terminal 1, then `npm 
 ### C. Create the database
 In **MySQL Workbench**, connect to your server, then:
 
-1. **File → Open SQL Script…** → choose `database/gourmetcraft_schema.sql` → click the ⚡ button.
-2. **File → Open SQL Script…** → choose `database/gourmetcraft_data.sql` → click the ⚡ button.
+1. **File → Open SQL Script…** → choose `database/efrecipe_schema.sql` → click the ⚡ button.
+2. **File → Open SQL Script…** → choose `database/efrecipe_data.sql` → click the ⚡ button.
 
 Always in this order (1 then 2). Done: the database `projet_web` now contains the sample recipes and accounts.
 
@@ -76,8 +76,8 @@ Always in this order (1 then 2). Done: the database `projet_web` now contains th
 
 > 💻 **TERMINAL**
 > ```bash
-> mysql -u root -p --default-character-set=utf8mb4 -e "source database/gourmetcraft_schema.sql"
-> mysql -u root -p --default-character-set=utf8mb4 -e "source database/gourmetcraft_data.sql"
+> mysql -u root -p --default-character-set=utf8mb4 -e "source database/efrecipe_schema.sql"
+> mysql -u root -p --default-character-set=utf8mb4 -e "source database/efrecipe_data.sql"
 > ```
 
 Type your MySQL password each time. (Do not use `mysql ... < file.sql` in PowerShell: it does not work there.)
@@ -87,16 +87,16 @@ Type your MySQL password each time. (Do not use `mysql ... < file.sql` in PowerS
 
 ## 💾 Save your data (export)
 
-Use this to turn what is currently in your database (new recipes, accounts, reviews...) into the new `database/gourmetcraft_data.sql`.
+Use this to turn what is currently in your database (new recipes, accounts, reviews...) into the new `database/efrecipe_data.sql`.
 
 **Step 1 — Export from MySQL Workbench**
 1. Menu **Server → Data Export**.
 2. Tick the schema **`projet_web`**.
 3. In the dropdown under the table list, choose **Dump Data Only**.
-4. Choose **Export to Self-Contained File** and set the file to `database/gourmetcraft_data_raw.sql`.
+4. Choose **Export to Self-Contained File** and set the file to `database/efrecipe_data_raw.sql`.
 5. Click **Start Export**.
 
-**Step 2 — Clean it with an AI.** Open an AI chat, attach `gourmetcraft_data_raw.sql` **and** `gourmetcraft_schema.sql`, and send:
+**Step 2 — Clean it with an AI.** Open an AI chat, attach `efrecipe_data_raw.sql` **and** `efrecipe_schema.sql`, and send:
 
 > 🤖 **MESSAGE FOR THE AI**
 > ```text
@@ -104,10 +104,10 @@ Use this to turn what is currently in your database (new recipes, accounts, revi
 > 2. Delete everything that is not an INSERT
 > 3. Keep every INSERT INTO and all its values exactly as they are
 >    (accents, \n, NULL, dates, password hashes).
-> > Turn the dump into a clean file named `gourmetcraft_data.sql`
+> > Turn the dump into a clean file named `efrecipe_data.sql`
 > ```
 
-**Step 3 — Replace the file.** Paste the AI's answer into `database/gourmetcraft_data.sql` (replace everything), then delete `gourmetcraft_data_raw.sql`.
+**Step 3 — Replace the file.** Paste the AI's answer into `database/efrecipe_data.sql` (replace everything), then delete `efrecipe_data_raw.sql`.
 
 **Step 4 — Test it.** Run the two SQL files again (section *Create the database*) and check that your recipes are there.
 
@@ -157,17 +157,17 @@ Use this to turn what is currently in your database (new recipes, accounts, revi
 | `Favorites` | one row per (user, recipe) |
 | other tables | subscriptions, payments, chat, reports... (future features, not used yet) |
 
-Additions made for the app are tagged `[APP]` in `gourmetcraft_schema.sql`: `Recipes.images`, `Recipes.shared`, `Recipes.sharedAt` and the `Favorites` table.
+Additions made for the app are tagged `[APP]` in `efrecipe_schema.sql`: `Recipes.images`, `Recipes.shared`, `Recipes.sharedAt` and the `Favorites` table.
 Categories are `Entrée` / `Plat` / `Dessert` / `Rapide` in the database, shown as Starter / Main / Dessert / Quick.
 </details>
 
 <details>
 <summary><b>When you change the database or add a feature (checklist)</b></summary>
 
-1. Edit `database/gourmetcraft_schema.sql` (the single source of truth for the structure).
+1. Edit `database/efrecipe_schema.sql` (the single source of truth for the structure).
 2. Create / update the model in `backend/models/` and its relations in `backend/models/index.js`.
 3. Update the controller / routes, then the frontend.
-4. Update `database/gourmetcraft_data.sql` so the new data has samples.
+4. Update `database/efrecipe_data.sql` so the new data has samples.
 5. Test from zero: run the two SQL files, start both servers, try the feature. Run `npm run build` in `frontend`.
 6. Update this README and tell the team to re-run the two SQL files.
 
@@ -177,7 +177,7 @@ Categories are `Entrée` / `Plat` / `Dessert` / `Rapide` in the database, shown 
 <details>
 <summary><b>Git: what to commit, what to do after a pull</b></summary>
 
-- **Never commit:** `backend/.env`, `node_modules/`, `backend/img/*`, `dist/`, `gourmetcraft_data_raw.sql`.
+- **Never commit:** `backend/.env`, `node_modules/`, `backend/img/*`, `dist/`, `efrecipe_data_raw.sql`.
 - After `git pull`: if `package.json` changed → `npm install` in that folder (it is already in your routine). If `database/*.sql` changed → run the two SQL files again (⚠️ erases local data).
 </details>
 

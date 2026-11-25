@@ -3,7 +3,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16 sm:h-20 items-center gap-3">
         <!-- Logo (the whole block is one link back to the home tab) -->
-        <RouterLink to="/" class="flex items-center space-x-3 text-left rounded-2xl p-1 -m-1 hover:bg-brand-50 transition-colors shrink-0" aria-label="GourmetCraft, go to the home page">
+        <RouterLink to="/" class="flex items-center space-x-3 text-left rounded-2xl p-1 -m-1 hover:bg-brand-50 transition-colors shrink-0" aria-label="Ef'Recipe, go to the home page">
           <span class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-brand-500 to-brand-400 rounded-2xl flex items-center justify-center text-white text-lg sm:text-xl shadow-lg shadow-brand-500/30">
             <i class="fa-solid fa-utensils"></i>
           </span>

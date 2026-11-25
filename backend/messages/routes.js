@@ -81,7 +81,7 @@ async function ensureMessagingSchema(sequelize) {
     await ensureColumn('ModContactTickets', 'adminOnly', 'TINYINT(1) NOT NULL DEFAULT 0')
     await ensureColumn('ChatRooms', 'createdBy', 'INT DEFAULT NULL')   // créateur d'un groupe
   } catch (error) {
-    console.error('❌ Messagerie : impossible de préparer les tables (importez database/gourmetcraft_schema.sql puis database/add_messaging.sql).', error.message)
+    console.error('❌ Messagerie : impossible de préparer les tables (importez database/efrecipe_schema.sql puis database/add_messaging.sql).', error.message)
   }
 }
 

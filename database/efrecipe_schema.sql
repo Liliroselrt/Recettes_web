@@ -1,10 +1,10 @@
 -- ==========================================================================
--- GourmetCraft - Carnet de recettes communautaire
+-- Ef'Recipe - Carnet de recettes communautaire
 -- Script MySQL (1/2) : STRUCTURE (Base de données & Tables)
 --
--- Utilisation :   mysql -u root -p < database/gourmetcraft_schema.sql
+-- Utilisation :   mysql -u root -p < database/efrecipe_schema.sql
 --            ou : exécuter ce fichier en premier dans MySQL Workbench,
---                 puis exécuter `gourmetcraft_data.sql`.
+--                 puis exécuter `efrecipe_data.sql`.
 --
 -- Les tables (`Users`, `Recipes`) reproduisent les modèles Sequelize du backend
 -- (backend/models). Le backend utilise `sequelize.sync()` (sans `alter`) : il ne

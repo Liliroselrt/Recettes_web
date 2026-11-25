@@ -205,7 +205,7 @@ export async function exportRecipePdf(recipe) {
     doc.setPage(p)
     doc.setDrawColor(...LINE).setLineWidth(0.25).line(PAGE.margin, PAGE.h - 12, PAGE.w - PAGE.margin, PAGE.h - 12)
     doc.setFont('helvetica', 'bold').setFontSize(8).setTextColor(...BRAND)
-    doc.text('GourmetCraft', PAGE.margin, PAGE.h - 7.5)
+    doc.text("Ef'Recipe", PAGE.margin, PAGE.h - 7.5)
     doc.setFont('helvetica', 'normal').setTextColor(...MUTED)
     doc.text(`${p} / ${pages}`, PAGE.w - PAGE.margin, PAGE.h - 7.5, { align: 'right' })
   }

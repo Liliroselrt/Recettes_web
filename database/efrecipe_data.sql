@@ -1,9 +1,9 @@
 -- ==========================================================================
--- GourmetCraft - Carnet de recettes communautaire
+-- Ef'Recipe - Carnet de recettes communautaire
 -- Script MySQL (2/2) : DONNÉES DE DÉPART (Seed Data)
 --
--- Prérequis   : avoir exécuté `gourmetcraft_schema.sql` au préalable.
--- Utilisation : mysql -u root -p < database/gourmetcraft_data.sql
+-- Prérequis   : avoir exécuté `efrecipe_schema.sql` au préalable.
+-- Utilisation : mysql -u root -p < database/efrecipe_data.sql
 --
 -- Source des données : recipes-data.js (26 recettes, 30 avis, 10 comptes de démo),
 -- mises à jour à partir du dump du 2026-11-19 (ajout des comptes Recipe_web et Cyp).
@@ -27,8 +27,8 @@ INSERT INTO `Users` (`id`, `username`, `email`, `password`, `role`, `bio`, `avat
   (6, 'Julie_Bakes', 'julie_bakes@example.com', '$2b$10$J1CSCmM9W0QfmHw4uVYaKes2JcdR0FPslj2p5r.ohLGkniTWkI5zK', 'user', 'Sweet treats, Sunday brunch pancakes and chocolate.', NULL, 'Paris, France', 'Baking & Desserts', NULL, FALSE, NULL, '2026-09-01 08:00:00', '2026-09-01 08:00:00'),
   (7, 'Nina_Veggie', 'nina_veggie@example.com', '$2b$10$J1CSCmM9W0QfmHw4uVYaKes2JcdR0FPslj2p5r.ohLGkniTWkI5zK', 'user', 'Colorful, fresh and plant-forward recipes in under 20 minutes.', NULL, 'Montreal, Canada', 'Vegetarian & Fresh', NULL, FALSE, NULL, '2026-09-01 08:00:00', '2026-09-01 08:00:00'),
   (8, 'Sophie', 'sophie@example.com', '$2b$10$J1CSCmM9W0QfmHw4uVYaKes2JcdR0FPslj2p5r.ohLGkniTWkI5zK', 'user', 'Home cook testing recipes from around the world.', NULL, 'Brussels, Belgium', 'Home Cooking', NULL, FALSE, NULL, '2026-09-01 08:00:00', '2026-09-01 08:00:00'),
-  (9, 'Admin_Gourmet', 'admin@gourmetcraft.com', '$2b$10$J1CSCmM9W0QfmHw4uVYaKes2JcdR0FPslj2p5r.ohLGkniTWkI5zK', 'user', 'GourmetCraft Platform Administrator.', NULL, 'Paris, France', 'Platform Administration', NULL, FALSE, NULL, '2026-09-01 08:00:00', '2026-09-01 08:00:00'),
-  (10, 'Mod_Claire', 'mod.claire@gourmetcraft.com', '$2b$10$J1CSCmM9W0QfmHw4uVYaKes2JcdR0FPslj2p5r.ohLGkniTWkI5zK', 'user', 'Community Moderator — here to keep GourmetCraft friendly and helpful!', NULL, 'Nantes, France', 'Community Moderation', NULL, FALSE, NULL, '2026-09-01 08:00:00', '2026-09-01 08:00:00'),
+  (9, 'Admin_Gourmet', 'admin@efrecipe.com', '$2b$10$J1CSCmM9W0QfmHw4uVYaKes2JcdR0FPslj2p5r.ohLGkniTWkI5zK', 'user', 'Ef''Recipe Platform Administrator.', NULL, 'Paris, France', 'Platform Administration', NULL, FALSE, NULL, '2026-09-01 08:00:00', '2026-09-01 08:00:00'),
+  (10, 'Mod_Claire', 'mod.claire@efrecipe.com', '$2b$10$J1CSCmM9W0QfmHw4uVYaKes2JcdR0FPslj2p5r.ohLGkniTWkI5zK', 'user', 'Community Moderator — here to keep Ef''Recipe friendly and helpful!', NULL, 'Nantes, France', 'Community Moderation', NULL, FALSE, NULL, '2026-09-01 08:00:00', '2026-09-01 08:00:00'),
   (11, 'Recipe_web', 'Recipe@web.com', '$2b$10$5E.akxBhAcHAACsaTsYVueiJt/Cw.lbQe60zTFNsKryQ0JJBapd/e', 'admin', NULL, NULL, NULL, NULL, NULL, FALSE, NULL, '2026-11-19 13:23:46', '2026-11-19 13:23:46'),
   (12, 'Cyp', 'cyprien.donne@efrei.net', '$2b$10$EvbYAIXN1kTNeBC0CG0pTuy/R2O5iG3ChF3Cow2gB57HXGPpZoVni', 'moderator', NULL, NULL, NULL, NULL, NULL, FALSE, NULL, '2026-11-19 13:26:12', '2026-11-19 13:26:12');
 
@@ -143,7 +143,7 @@ INSERT INTO `UserFollows` (`followerId`, `followingId`, `createdAt`) VALUES
   (6, 1, '2026-10-07 12:00:00');
 
 INSERT INTO `ChatRooms` (`id`, `name`, `type`, `createdAt`, `updatedAt`) VALUES
-  (1, 'GourmetCraft Lounge (General)', 'group', '2026-09-01 08:00:00', '2026-11-12 10:00:00'),
+  (1, 'Ef''Recipe Lounge (General)', 'group', '2026-09-01 08:00:00', '2026-11-12 10:00:00'),
   (2, NULL, 'direct', '2026-11-10 11:05:00', '2026-11-10 11:15:00');
 
 INSERT INTO `ChatParticipants` (`roomId`, `userId`, `joinedAt`, `lastReadAt`) VALUES

@@ -5,7 +5,7 @@ Projet local : aucun vrai paiement. La fenêtre de paiement est factice (aucune 
 ## Contenu
 | Dossier | Contenu |
 |---|---|
-| `database/` | `gourmetcraft_schema.sql` et `gourmetcraft_data.sql` modifiés (devise ZAR, plan à 30 ZAR, vidéos réservées aux abonnés) |
+| `database/` | `efrecipe_schema.sql` et `efrecipe_data.sql` modifiés (devise ZAR, plan à 30 ZAR, vidéos réservées aux abonnés) |
 | `backend/subscription/` | `access.js` (règles d'accès aux vidéos), `routes.js` (routes `/api/subscription/*`) |
 | `frontend/src/` | nouveaux : `composables/useSubscription.js`, `views/PlansView.vue`, `components/FakePaymentModal.vue` ; modifiés : `router/index.js`, `Navbar.vue`, `RecipeModal.vue`, `RecipeFormModal.vue` |
 

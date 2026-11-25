@@ -54,7 +54,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Server error.' });
 });
 
-// Les tables sont créées par database/gourmetcraft.sql. `sync()` ne fait que créer
+// Les tables sont créées par database/efrecipe_schema.sql. `sync()` ne fait que créer
 // celles qui manquent. On évite `{ alter: true }` : sous Windows (noms de tables en
 // minuscules) il rajoute une clé étrangère à chaque démarrage puis plante avec
 // « Duplicate foreign key constraint name ».

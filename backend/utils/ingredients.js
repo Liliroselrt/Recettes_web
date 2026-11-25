@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------
 // Les ingrédients sont stockés dans la base sous forme de TEXTE, une ligne par
-// ingrédient (c'est le format de gourmetcraft_data.sql) :
+// ingrédient (c'est le format de efrecipe_data.sql) :
 //     150 g sugar        quantité + unité (g, ml, tbsp, tsp) + nom
 //     6 apples           quantité sans unité (pièces)
 //     Black pepper (to taste)   sans quantité

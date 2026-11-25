@@ -1,6 +1,6 @@
-# 🍳 GourmetCraft – Community Cookbook
+# 🍳 Ef'Recipe – Community Cookbook
 
-**GourmetCraft** is a full-stack web application where cooking enthusiasts explore, share, rate and manage recipes. Beyond the classic recipe book, it includes a **pantry** ("What can I cook with what I have?") that tells you which recipes you can make with the ingredients you own.
+**Ef'Recipe** is a full-stack web application where cooking enthusiasts explore, share, rate and manage recipes. Beyond the classic recipe book, it includes a **pantry** ("What can I cook with what I have?") that tells you which recipes you can make with the ingredients you own.
 
 ---
 
@@ -36,8 +36,8 @@
 ### 2. Database Setup
 The database is defined by two scripts in `database/`, to run **in this order**:
 ```bash
-mysql -u root -p --default-character-set=utf8mb4 < database/gourmetcraft_schema.sql   # drops & recreates `projet_web`, creates the tables
-mysql -u root -p --default-character-set=utf8mb4 < database/gourmetcraft_data.sql     # inserts the sample data
+mysql -u root -p --default-character-set=utf8mb4 < database/efrecipe_schema.sql   # drops & recreates `projet_web`, creates the tables
+mysql -u root -p --default-character-set=utf8mb4 < database/efrecipe_data.sql     # inserts the sample data
 ```
 (or run both files, in that order, in MySQL Workbench).
 
@@ -46,7 +46,7 @@ Sample data: 26 recipes, 30 reviews, 10 accounts (8 users, 1 admin, 1 moderator)
 *(Note: the backend uses `sequelize.sync()`, which only creates missing tables. Do not switch it to `{ alter: true }`: on Windows it adds a foreign key at every start and ends with a "Duplicate foreign key constraint name" error.)*
 
 #### What the application needs from the schema
-The schema contains many tables for future features (subscriptions, chat, moderation...) that the application does not use yet. The few additions made for the application are tagged `[APP]` in `gourmetcraft_schema.sql`:
+The schema contains many tables for future features (subscriptions, chat, moderation...) that the application does not use yet. The few additions made for the application are tagged `[APP]` in `efrecipe_schema.sql`:
 
 | Addition | Purpose |
 | --- | --- |
@@ -123,7 +123,7 @@ A **premium** video (`isVideoPremium`) is never sent to other users: they only g
 * **`components/`** – `Navbar`, `RecipeCard`, `RecipeCarousel`, `RecipeModal` (detail window), `RecipeFormModal` (create / edit), `AuthModal` (log in / sign up), `PantryPanel`.
 * **`composables/`** – shared state: `useAuth` (session), `useUI` (open windows), `useRecipes` (recipes, favorites, reviews, CRUD), `usePantry` (pantry logic), `useImages` (carousel).
 * **`utils/`** – `api.js` (fetch wrapper with JWT) and `recipes.js` (constants, formatting, image resizing).
-* **`assets/main.css`** – Tailwind + the GourmetCraft design system (buttons, pills, fields, cards, carousel…).
+* **`assets/main.css`** – Tailwind + the Ef'Recipe design system (buttons, pills, fields, cards, carousel…).
 
 ---
 
